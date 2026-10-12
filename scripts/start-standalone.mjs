@@ -1,10 +1,11 @@
-// Inicia el build standalone para las pruebas E2E (copia los recursos estáticos como en producción).
+// Inicia el build de producción (salida standalone) copiando los recursos estáticos,
+// igual que en la imagen Docker. Uso: `pnpm build && pnpm start`.
 import { cpSync, existsSync } from "node:fs";
 import { spawn } from "node:child_process";
 
 const dir = ".next/standalone";
 if (!existsSync(`${dir}/server.js`)) {
-  console.error("No existe el build de producción. Ejecuta `pnpm build` antes de `pnpm test:e2e`.");
+  console.error("No existe el build de producción. Ejecuta `pnpm build` primero.");
   process.exit(1);
 }
 cpSync("public", `${dir}/public`, { recursive: true });

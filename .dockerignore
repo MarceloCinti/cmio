@@ -1,0 +1,16 @@
+# Nunca enviar secretos, datos ni artefactos locales al contexto de Docker.
+.env
+.env.*
+!.env.example
+.git
+.next
+node_modules
+storage
+.data
+backups
+playwright-report
+test-results
+coverage
+src/generated
+*.log
+scripts/.*.mjs

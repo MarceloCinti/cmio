@@ -23,7 +23,7 @@ export default defineConfig({
     { name: "movil", use: { ...devices["Pixel 7"], viewport: { width: 390, height: 844 } } },
   ],
   webServer: {
-    command: "node scripts/e2e-server.mjs",
+    command: "node scripts/start-standalone.mjs",
     url: `http://localhost:${E2E_PORT}/api/salud`,
     timeout: 120_000,
     reuseExistingServer: false,

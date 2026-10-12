@@ -1,0 +1,65 @@
+# Despliegue de referencia en un servidor propio (VPS) detrás de un proxy inverso con HTTPS.
+# Uso: docker compose --env-file .env.production up -d --build
+# Ver docs/DESPLIEGUE.md antes de usar en producción.
+
+services:
+  db:
+    image: postgres:16-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: cmio
+      POSTGRES_USER: cmio_owner
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:?Define APP_DB_PASSWORD}
+      TZ: America/Asuncion
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/postgres-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cmio_owner -d cmio"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # Aplica migraciones y datos base con el rol propietario; luego termina.
+  migrate:
+    build: { context: ., target: migrator }
+    restart: "no"
+    env_file: .env.production
+    environment:
+      DATABASE_URL: postgresql://cmio_owner:${POSTGRES_PASSWORD}@db:5432/cmio
+    depends_on:
+      db: { condition: service_healthy }
+
+  app:
+    build: { context: ., target: runner }
+    restart: unless-stopped
+    env_file: .env.production
+    environment:
+      # La aplicación usa el rol de mínimo privilegio.
+      DATABASE_URL: postgresql://cmio_app:${APP_DB_PASSWORD}@db:5432/cmio
+      STORAGE_LOCAL_PATH: /data/storage
+      TRUST_PROXY: "true"
+    volumes:
+      - storage:/data/storage
+    ports:
+      # Solo accesible desde el propio servidor: el proxy inverso publica el sitio por HTTPS.
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+
+  # Tarea periódica: recordatorios, cola de mensajes y limpieza (cada 5 minutos).
+  cron:
+    image: curlimages/curl:8.11.1
+    restart: unless-stopped
+    environment:
+      CRON_SECRET: ${CRON_SECRET:?Define CRON_SECRET}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - 'sleep 60; while true; do curl -fsS -m 120 -H "Authorization: Bearer $${CRON_SECRET}" http://app:3000/api/cron > /dev/null || echo "cron: falló la ejecución"; sleep 300; done'
+    depends_on:
+      app: { condition: service_healthy }
+
+volumes:
+  pgdata:
+  storage:

@@ -2,10 +2,13 @@ import path from "node:path";
 
 export const E2E_PORT = 3100;
 export const E2E_DATABASE_URL = process.env.E2E_DATABASE_URL ?? "postgresql://cmio:cmio_dev_local@localhost:5432/cmio_e2e_test";
+// Opcional: conexión del servidor con un rol de mínimo privilegio (solo SELECT/INSERT/UPDATE/DELETE).
+// La preparación (migraciones y datos) siempre usa E2E_DATABASE_URL.
+export const E2E_APP_DATABASE_URL = process.env.E2E_APP_DATABASE_URL ?? E2E_DATABASE_URL;
 
 // Entorno del servidor durante las pruebas E2E (sin integraciones externas reales).
 export const E2E_ENV: Record<string, string> = {
-  DATABASE_URL: E2E_DATABASE_URL,
+  DATABASE_URL: E2E_APP_DATABASE_URL,
   APP_URL: `http://localhost:${E2E_PORT}`,
   PORT: String(E2E_PORT),
   HOSTNAME: "localhost",

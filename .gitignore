@@ -31,3 +31,6 @@ coverage/
 
 # scripts locales de verificación visual
 scripts/.*.mjs
+
+# Respaldos locales (contienen datos de salud)
+/backups/
