@@ -5,7 +5,7 @@ import { updateRequestAction } from "@/app/panel/admin-actions";
 
 export function RequestStatusForm({ id, status, note }: { id: string; status: string; note: string }) {
   return (
-    <ActionForm action={updateRequestAction} className="grid gap-3 sm:grid-cols-[12rem_1fr_auto] sm:items-end">
+    <ActionForm action={updateRequestAction} className="grid grid-cols-1 gap-3 sm:grid-cols-[12rem_1fr_auto] sm:items-end">
       <input type="hidden" name="id" value={id} />
       <SelectField
         name="status"

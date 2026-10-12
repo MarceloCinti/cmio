@@ -58,7 +58,7 @@ export default async function ReceptionPage() {
           </div>
         ))}
       </dl>
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <Section title="Sala de espera" description="Por orden de llegada" items={waiting} actor={actor} policy={policy} showWaiting empty="No hay pacientes en sala de espera." />
         <Section title="Por llegar" description="Citas programadas y confirmadas de hoy" items={expected} actor={actor} policy={policy} empty="No quedan pacientes por llegar." />
         <Section title="En atención" items={inCare} actor={actor} policy={policy} empty="Ningún paciente en atención en este momento." />

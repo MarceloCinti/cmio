@@ -99,11 +99,11 @@ function Step1({ hidden, errors }: { hidden: boolean; errors: FieldErrors }) {
           Revisa los datos marcados para continuar.
         </Alert>
       ) : null}
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <TextField name="firstName" label="Nombre" autoComplete="given-name" required error={errors.firstName?.[0]} />
         <TextField name="lastName" label="Apellido" autoComplete="family-name" required error={errors.lastName?.[0]} />
       </div>
-      <div className="grid gap-5 sm:grid-cols-[0.9fr_1.1fr]">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-[0.9fr_1.1fr]">
         <SelectField
           name="documentType"
           label="Tipo de documento"
@@ -117,7 +117,7 @@ function Step1({ hidden, errors }: { hidden: boolean; errors: FieldErrors }) {
         />
         <TextField name="documentNumber" label="Número de documento" inputMode="numeric" autoComplete="off" required error={errors.documentNumber?.[0]} />
       </div>
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <TextField name="birthDate" label="Fecha de nacimiento" type="date" autoComplete="bday" required error={errors.birthDate?.[0]} max={new Date().toISOString().slice(0, 10)} />
         <TextField name="phone" label="Teléfono celular" type="tel" inputMode="tel" autoComplete="tel" placeholder="0981 123 456" required error={errors.phone?.[0]} />
       </div>

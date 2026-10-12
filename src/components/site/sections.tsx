@@ -152,7 +152,7 @@ export function AboutSection({ about, headingLevel = "h2" }: { about: Landing["a
   return (
     <section id="la-clinica" aria-labelledby="clinica-titulo" className="scroll-mt-20 bg-surface py-16 sm:py-24">
       <div className="container-page">
-        <div className="grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-16">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:items-center lg:gap-16">
           <div>
             <SectionHeading eyebrow="Quiénes somos" title={about.title} intro={about.intro} as={headingLevel} id="clinica-titulo" />
             {first ? (

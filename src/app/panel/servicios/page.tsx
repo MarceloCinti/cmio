@@ -25,7 +25,7 @@ export default async function ServicesAdminPage() {
           No se muestran en el sitio ni pueden agendarse en línea hasta que confirmes que la clínica efectivamente los ofrece.
         </Alert>
       ) : null}
-      <div className="grid gap-6 xl:grid-cols-[1.4fr_1fr]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.4fr_1fr]">
         <Card>
           <CardHeader title={`Servicios (${items.length})`} />
           <ul className="divide-y divide-line">

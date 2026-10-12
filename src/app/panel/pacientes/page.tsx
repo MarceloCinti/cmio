@@ -32,12 +32,12 @@ export default async function PatientsPage({ searchParams }: PageProps<"/panel/p
         actions={canCreate ? <ButtonLink href="/panel/pacientes/nuevo" icon={<UserPlus className="size-4" aria-hidden="true" />}>Registrar paciente</ButtonLink> : null}
       />
       <form role="search" className="mb-5 flex gap-2" action="/panel/pacientes">
-        <label className="relative flex-1">
+        <label className="relative min-w-0 flex-1">
           <span className="sr-only">Buscar paciente</span>
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted" aria-hidden="true" />
           <input name="q" type="search" defaultValue={q} placeholder="Nombre, documento o teléfono" className={`${inputClasses} pl-9`} />
         </label>
-        <button type="submit" className="min-h-11 rounded-xl bg-primary px-4 font-semibold text-white hover:bg-primary-strong">
+        <button type="submit" className="min-h-11 shrink-0 rounded-xl bg-primary px-4 font-semibold text-white hover:bg-primary-strong">
           Buscar
         </button>
       </form>

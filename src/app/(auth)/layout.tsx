@@ -10,7 +10,7 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
   return (
     <div className="flex min-h-dvh flex-col">
       <DemoBanner />
-      <div className="grid flex-1 lg:grid-cols-[1fr_1.05fr]">
+      <div className="grid grid-cols-1 flex-1 lg:grid-cols-[1fr_1.05fr]">
         <div className="flex flex-col px-4 py-6 sm:px-8 lg:px-14">
           <Link href="/" className="self-start rounded-lg" aria-label="Ir al sitio de la clínica">
             <Logo logoPath={branding.logoPath} logoAlt={branding.logoAlt} shortName={institution.shortName} subtitle={institution.name} />

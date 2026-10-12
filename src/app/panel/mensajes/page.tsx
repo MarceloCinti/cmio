@@ -97,7 +97,7 @@ async function Log({ status, page, actorP }: { status?: MessageStatus; page: num
 async function Templates({ actorP }: { actorP: Awaited<ReturnType<typeof requirePermission>> }) {
   const templates = await listTemplates(actorP);
   return (
-    <div className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
+    <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.6fr_1fr]">
       <Card>
         <CardHeader title="Plantillas" />
         <ul className="divide-y divide-line">

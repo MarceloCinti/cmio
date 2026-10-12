@@ -59,7 +59,7 @@ export default async function MyAppointmentPage({ params, searchParams }: PagePr
 
       <Card>
         <CardBody>
-          <dl className="grid gap-4 sm:grid-cols-2">
+          <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Info icon={CalendarClock} label="Fecha">
               <span className="first-letter:uppercase">{formatLongDate(appt.startsAt)}</span>
             </Info>

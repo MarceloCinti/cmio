@@ -15,7 +15,7 @@ export default async function AccountPage() {
       <Card>
         <CardHeader title="Datos de la cuenta" />
         <CardBody>
-          <dl className="grid gap-3 text-sm sm:grid-cols-2">
+          <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
             <div>
               <dt className="text-muted">Nombre</dt>
               <dd className="font-medium text-ink">{actor.name}</dd>

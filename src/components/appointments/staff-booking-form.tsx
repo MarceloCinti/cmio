@@ -63,7 +63,7 @@ export function StaffBookingForm({ services, professionals, initialPatient, init
 
       <section className="rounded-2xl border border-line bg-surface p-5">
         <h2 className="mb-4 text-base font-semibold text-ink">2. Profesional y servicio</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <SelectField
             name="professionalId"
             label="Profesional"
@@ -110,7 +110,7 @@ export function StaffBookingForm({ services, professionals, initialPatient, init
           />
         ) : null}
         {overbook ? (
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <TextField name="overbookDate" label="Fecha" type="date" required defaultValue={initialDate} />
             <TextField name="overbookTime" label="Hora" type="time" step={300} required />
             <TextField name="reason" label="Motivo del sobreturno" required maxLength={300} />

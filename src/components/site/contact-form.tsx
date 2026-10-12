@@ -23,7 +23,7 @@ export function ContactForm() {
   return (
     <ActionForm action={sendContactAction} schema={contactFormSchema} showSuccess={false} onSuccess={() => setSent(true)} className="space-y-4">
       <TextField name="fullName" label="Nombre y apellido" autoComplete="name" required />
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <TextField name="phone" label="Teléfono" type="tel" inputMode="tel" autoComplete="tel" placeholder="0981 123 456" required />
         <TextField name="email" label="Correo electrónico" type="email" inputMode="email" autoComplete="email" optionalLabel />
       </div>

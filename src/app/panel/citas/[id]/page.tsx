@@ -70,10 +70,10 @@ export default async function PanelAppointmentPage({ params, searchParams }: Pag
           </>
         }
       />
-      <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.4fr_1fr]">
         <div className="space-y-6">
           <Card>
-            <CardBody className="grid gap-4 sm:grid-cols-2">
+            <CardBody className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Item icon={CalendarClock} label="Fecha y hora">
                 <span className="first-letter:uppercase">{formatLongDate(appt.startsAt)}</span>, {formatTime(appt.startsAt)} a {formatTime(appt.endsAt)}
               </Item>

@@ -10,7 +10,7 @@ export function BookingPolicyForm({ v }: { v: BookingPolicy }) {
     <ActionForm action={saveSystemSettingAction} className="space-y-4">
       <input type="hidden" name="key" value="booking" />
       <input type="hidden" name="__booleans" value="allowPatientReschedule" />
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <TextField name="minLeadHours" label="Anticipación mínima para reservar en línea (horas)" inputMode="numeric" defaultValue={String(v.minLeadHours)} />
         <TextField name="maxDaysAhead" label="Reservas en línea hasta (días hacia adelante)" inputMode="numeric" defaultValue={String(v.maxDaysAhead)} />
         <TextField name="patientCancelMinHours" label="El paciente puede cancelar hasta (horas antes)" inputMode="numeric" defaultValue={String(v.patientCancelMinHours)} />

@@ -15,7 +15,7 @@ export default async function SpecialtiesAdminPage() {
   return (
     <div className="space-y-6">
       <PageHeader title="Especialidades" description="Agrega, edita, oculta o elimina especialidades sin modificar el código." />
-      <div className="grid gap-6 xl:grid-cols-[1.4fr_1fr]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.4fr_1fr]">
         <Card>
           <CardHeader title={`Especialidades (${items.length})`} />
           <ul className="divide-y divide-line">

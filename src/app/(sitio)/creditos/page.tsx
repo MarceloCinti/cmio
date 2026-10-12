@@ -13,7 +13,7 @@ export default function CreditsPage() {
         intro="Las fotografías del sitio son imágenes ilustrativas de bancos de imágenes con licencia de uso comercial. No corresponden a las instalaciones ni al personal de la clínica."
       />
       <div className="container-page py-12">
-        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {STOCK_IMAGE_LIST.map((img) => (
             <li key={img.path} className="overflow-hidden rounded-2xl border border-line bg-surface">
               <div className="relative aspect-[16/10] bg-primary-soft">

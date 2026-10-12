@@ -74,7 +74,7 @@ export default async function PatientPage({ params, searchParams }: PageProps<"/
           </>
         }
       />
-      <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.5fr_1fr]">
         <div className="space-y-6">
           {canEdit ? (
             <PatientForm
@@ -90,7 +90,7 @@ export default async function PatientPage({ params, searchParams }: PageProps<"/
             <Card>
               <CardHeader title="Datos del paciente" />
               <CardBody>
-                <dl className="grid gap-3 text-sm sm:grid-cols-2">
+                <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
                   <Row label="Fecha de nacimiento" value={patient.birthDate ? formatCalendarDate(patient.birthDate) : "—"} />
                   <Row label="Sexo" value={patient.sex ? SEX_LABELS[patient.sex] : "—"} />
                   <Row label="Teléfono" value={patient.phone ?? "—"} />

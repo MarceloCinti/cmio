@@ -42,11 +42,11 @@ export function PatientForm({
       {next ? <input type="hidden" name="siguiente" value={next} /> : null}
       <fieldset className="space-y-4 rounded-2xl border border-line bg-surface p-5">
         <legend className="px-1 text-base font-semibold text-ink">Identificación</legend>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <TextField name="firstName" label="Nombre" required defaultValue={v("firstName")} autoComplete="off" />
           <TextField name="lastName" label="Apellido" required defaultValue={v("lastName")} autoComplete="off" />
         </div>
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <SelectField
             name="documentType"
             label="Tipo de documento"
@@ -77,15 +77,15 @@ export function PatientForm({
       </fieldset>
       <fieldset className="space-y-4 rounded-2xl border border-line bg-surface p-5">
         <legend className="px-1 text-base font-semibold text-ink">Contacto</legend>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <TextField name="phone" label="Teléfono" type="tel" inputMode="tel" required defaultValue={v("phone")} />
           <TextField name="email" label="Correo electrónico" type="email" inputMode="email" optionalLabel defaultValue={v("email")} hint="Necesario para invitar al portal." />
         </div>
-        <div className="grid gap-4 sm:grid-cols-[1fr_2fr]">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_2fr]">
           <TextField name="city" label="Ciudad" optionalLabel defaultValue={v("city")} />
           <TextField name="address" label="Dirección" optionalLabel defaultValue={v("address")} />
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <TextField name="emergencyContactName" label="Contacto de emergencia" optionalLabel defaultValue={v("emergencyContactName")} />
           <TextField name="emergencyContactPhone" label="Teléfono de emergencia" type="tel" inputMode="tel" optionalLabel defaultValue={v("emergencyContactPhone")} />
         </div>

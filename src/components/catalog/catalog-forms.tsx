@@ -33,7 +33,7 @@ export function SpecialtyForm({ s }: { s?: Specialty }) {
   return (
     <ActionForm action={saveSpecialtyAction} schema={specialtySchema} resetOnSuccess={!s} className="space-y-4">
       {s ? <input type="hidden" name="id" value={s.id} /> : null}
-      <div className="grid gap-4 sm:grid-cols-[1fr_8rem]">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_8rem]">
         <TextField name="name" label="Nombre" required defaultValue={s?.name} />
         <TextField name="sortOrder" label="Orden" inputMode="numeric" defaultValue={String(s?.sortOrder ?? 0)} />
       </div>
@@ -72,19 +72,19 @@ export function ServiceForm({ s, specialties }: { s?: Service; specialties: { id
   return (
     <ActionForm action={saveServiceAction} schema={serviceSchema} resetOnSuccess={!s} className="space-y-4">
       {s ? <input type="hidden" name="id" value={s.id} /> : null}
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <TextField name="name" label="Nombre" required defaultValue={s?.name} />
         <SelectField name="category" label="Categoría" defaultValue={s?.category ?? "CONSULTATION"} options={Object.entries(SERVICE_CATEGORY_LABELS).map(([value, label]) => ({ value, label }))} />
       </div>
       <TextField name="summary" label="Descripción breve" required defaultValue={s?.summary} />
       <TextAreaField name="description" label="Descripción" rows={2} defaultValue={s?.description ?? ""} optionalLabel />
-      <div className="grid gap-4 sm:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
         <SelectField name="specialtyId" label="Especialidad" defaultValue={s?.specialtyId ?? ""} placeholder="Ninguna" options={specialties.map((x) => ({ value: x.id, label: x.name }))} />
         <TextField name="durationMinutes" label="Duración (min)" inputMode="numeric" required defaultValue={String(s?.durationMinutes ?? 30)} />
         <TextField name="capacityPerSlot" label="Pacientes por turno" inputMode="numeric" defaultValue={String(s?.capacityPerSlot ?? 1)} hint="1 = turno exclusivo" />
         <TextField name="sortOrder" label="Orden" inputMode="numeric" defaultValue={String(s?.sortOrder ?? 0)} />
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <TextField name="price" label="Precio (Gs.)" inputMode="numeric" defaultValue={s?.price != null ? String(s.price) : ""} optionalLabel />
         <CheckboxField name="showPrice" defaultChecked={s?.showPrice} label="Mostrar el precio en el sitio" wrapperClassName="sm:pt-8" />
       </div>
@@ -141,7 +141,7 @@ export function ProfessionalForm({
       {p ? <input type="hidden" name="id" value={p.id} /> : null}
       <fieldset className="space-y-4 rounded-2xl border border-line bg-surface p-5">
         <legend className="px-1 text-base font-semibold text-ink">Datos del profesional</legend>
-        <div className="grid gap-4 sm:grid-cols-[8rem_1fr_1fr]">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-[8rem_1fr_1fr]">
           <TextField name="honorific" label="Tratamiento" placeholder="Dr., Dra., Lic." defaultValue={p?.honorific ?? ""} optionalLabel />
           <TextField name="firstName" label="Nombre" required defaultValue={p?.firstName} />
           <TextField name="lastName" label="Apellido" required defaultValue={p?.lastName} />
@@ -164,7 +164,7 @@ export function ProfessionalForm({
         <legend className="px-1 text-base font-semibold text-ink">Especialidades y servicios</legend>
         <div>
           <p className="mb-2 text-sm font-medium text-ink">Especialidades</p>
-          <div className="grid gap-2 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {specialties.map((s) => (
               <CheckboxField key={s.id} name="specialtyIds[]" value={s.id} defaultChecked={p?.specialtyIds.includes(s.id)} label={s.name} />
             ))}
@@ -172,7 +172,7 @@ export function ProfessionalForm({
         </div>
         <div>
           <p className="mb-2 text-sm font-medium text-ink">Servicios que ofrece</p>
-          <div className="grid gap-2 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {services.map((s) => (
               <CheckboxField key={s.id} name="serviceIds[]" value={s.id} defaultChecked={p?.serviceIds.includes(s.id)} label={`${s.name}${s.confirmed ? "" : " (pendiente de confirmación)"}`} />
             ))}
@@ -181,7 +181,7 @@ export function ProfessionalForm({
       </fieldset>
       <fieldset className="space-y-4 rounded-2xl border border-line bg-surface p-5">
         <legend className="px-1 text-base font-semibold text-ink">Estado y acceso</legend>
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <SelectField
             name="status"
             label="Estado del perfil"

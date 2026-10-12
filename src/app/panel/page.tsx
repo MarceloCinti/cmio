@@ -76,7 +76,7 @@ export default async function PanelHome() {
       ) : null}
 
       {actor.professionalId ? (
-        <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.5fr_1fr]">
           <Card>
             <CardHeader
               title="Tus pacientes de hoy"

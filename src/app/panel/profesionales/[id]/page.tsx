@@ -31,7 +31,7 @@ export default async function ProfessionalAdminPage({ params, searchParams }: Pa
     <div className="space-y-6">
       {sp.nuevo === "1" ? <Alert tone="success" live title="Perfil creado">Configura ahora su disponibilidad semanal.</Alert> : null}
       <PageHeader back={{ href: "/panel/profesionales", label: "Profesionales" }} title={professionalDisplayName(p)} />
-      <div className="grid gap-6 2xl:grid-cols-[1.3fr_1fr]">
+      <div className="grid grid-cols-1 gap-6 2xl:grid-cols-[1.3fr_1fr]">
         <ProfessionalForm
           p={{
             ...p,

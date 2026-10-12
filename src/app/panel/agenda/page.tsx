@@ -171,7 +171,7 @@ function DayView({ appointments, groupByProfessional }: { appointments: Appointm
   }
   if (!groupByProfessional) {
     return (
-      <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+      <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
         {appointments.map((a) => (
           <li key={a.id}>
             <ApptCard a={a} />
@@ -187,7 +187,7 @@ function DayView({ appointments, groupByProfessional }: { appointments: Appointm
     groups.set(a.professionalId, g);
   }
   return (
-    <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
       {[...groups.entries()].map(([id, g]) => (
         <section key={id} aria-label={g.name} className="space-y-3">
           <h3 className="flex items-center justify-between rounded-xl bg-primary-soft px-3 py-2 text-sm font-semibold text-primary">
@@ -210,7 +210,7 @@ function WeekView({ appointments, from, q }: { appointments: AppointmentWithRela
   const days = daysBetweenISO(from, addDaysISO(from, 6));
   const today = todayISO();
   return (
-    <div className="grid gap-3 lg:grid-cols-7">
+    <div className="grid grid-cols-1 gap-3 lg:grid-cols-7">
       {days.map((d) => {
         const items = appointments.filter((a) => localISODateOf(a.startsAt) === d);
         return (

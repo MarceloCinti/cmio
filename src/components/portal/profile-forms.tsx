@@ -15,12 +15,12 @@ export function ProfileForms({ values, emailOptIn, whatsappOptIn }: { values: Va
         <CardHeader title="Datos de contacto" />
         <CardBody>
           <ActionForm action={updateMyProfileAction} schema={patientSelfSchema} className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <TextField name="phone" label="Teléfono celular" type="tel" inputMode="tel" required defaultValue={values.phone} />
               <TextField name="city" label="Ciudad" optionalLabel defaultValue={values.city} />
             </div>
             <TextField name="address" label="Dirección" optionalLabel defaultValue={values.address} />
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <TextField name="emergencyContactName" label="Contacto de emergencia" optionalLabel defaultValue={values.emergencyContactName} />
               <TextField name="emergencyContactPhone" label="Teléfono de emergencia" type="tel" inputMode="tel" optionalLabel defaultValue={values.emergencyContactPhone} />
             </div>

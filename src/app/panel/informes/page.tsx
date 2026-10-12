@@ -121,7 +121,7 @@ export default async function ReportsPage({ searchParams }: PageProps<"/panel/in
         <StatTile label="Programadas sin confirmar" value={report.scheduled} />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <Card>
           <CardHeader title="Citas por día" description="Excluye canceladas." />
           <CardBody>

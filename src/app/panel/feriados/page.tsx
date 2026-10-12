@@ -16,7 +16,7 @@ export default async function HolidaysPage() {
         title="Feriados y cierres"
         description="Días no laborables de toda la clínica. Bloquean la agenda de todos los profesionales. Verifica cada año los feriados oficiales, ya que algunos se trasladan por decreto."
       />
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <Card>
           <CardHeader title="Registrar feriado o cierre" />
           <CardBody>

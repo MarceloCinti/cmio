@@ -79,7 +79,7 @@ export function BookingWizard({
       {step === 0 ? (
         <fieldset>
           <legend className="mb-4 text-lg font-semibold text-ink">¿Qué especialidad necesitas?</legend>
-          <div role="radiogroup" className="grid gap-3 sm:grid-cols-2">
+          <div role="radiogroup" className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {specialties.map((s) => (
               <OptionCard
                 key={s.id}
@@ -101,7 +101,7 @@ export function BookingWizard({
         <div className="space-y-6">
           <fieldset>
             <legend className="mb-4 text-lg font-semibold text-ink">Elige el servicio</legend>
-            <div role="radiogroup" className="grid gap-3 sm:grid-cols-2">
+            <div role="radiogroup" className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {services.map((s) => (
                 <OptionCard
                   key={s.id}
@@ -117,7 +117,7 @@ export function BookingWizard({
           {serviceId ? (
             <fieldset>
               <legend className="mb-4 text-lg font-semibold text-ink">Elige el profesional</legend>
-              <div role="radiogroup" className="grid gap-3 sm:grid-cols-2">
+              <div role="radiogroup" className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {availablePros.map((p) => (
                   <OptionCard
                     key={p.id}
@@ -158,7 +158,7 @@ export function BookingWizard({
           <input type="hidden" name="serviceId" value={service.id} />
           <input type="hidden" name="startsAt" value={startsAt} />
           <h2 className="text-lg font-semibold text-ink">Revisa y confirma tu cita</h2>
-          <dl className="grid gap-3 rounded-2xl border border-line bg-surface p-5 sm:grid-cols-2">
+          <dl className="grid grid-cols-1 gap-3 rounded-2xl border border-line bg-surface p-5 sm:grid-cols-2">
             <Summary icon={CalendarCheck} label="Fecha">
               <span className="first-letter:uppercase">{formatLongDate(startsAt)}</span>
             </Summary>

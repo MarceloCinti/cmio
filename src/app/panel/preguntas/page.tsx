@@ -15,7 +15,7 @@ export default async function FaqAdminPage() {
   return (
     <div className="space-y-6">
       <PageHeader title="Preguntas frecuentes" description="Los cambios se publican al guardar." />
-      <div className="grid gap-6 xl:grid-cols-[1.4fr_1fr]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.4fr_1fr]">
         <Card>
           <CardHeader title={`Preguntas (${items.length})`} />
           <ul className="divide-y divide-line">

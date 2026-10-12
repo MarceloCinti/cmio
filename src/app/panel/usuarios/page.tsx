@@ -26,7 +26,7 @@ export default async function UsersPage() {
         title="Usuarios del personal"
         description="Los roles privilegiados solo se asignan desde aquí. Nadie puede asignar un rol igual o superior al propio ni modificar su propio rol. Los pacientes se gestionan desde su ficha."
       />
-      <div className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.6fr_1fr]">
         <Card>
           <CardHeader title={`Usuarios (${users.length})`} />
           <ul className="divide-y divide-line">

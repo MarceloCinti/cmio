@@ -64,7 +64,7 @@ export default async function SettingsPage() {
           ))}
         </ul>
       </Card>
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <Card>
           <CardHeader title="Políticas de agenda" description="Se aplican a las acciones de los pacientes en el portal. La secretaría puede gestionar excepciones." />
           <CardBody>

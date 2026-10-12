@@ -103,7 +103,8 @@ export function LineChart({ points, unit, label, height = 240, reference, format
           {reference ? (
             <g>
               <line x1={0} x2={innerW} y1={geom.y(reference.value)} y2={geom.y(reference.value)} stroke={CHART.axisText} strokeWidth={1} />
-              <text x={innerW + 6} y={geom.y(reference.value)} dy="0.32em" fontSize={11} fill={CHART.axisText}>
+              {/* Etiqueta dentro del área del gráfico para que no se corte en pantallas angostas. */}
+              <text x={6} y={geom.y(reference.value) - 6} fontSize={11} fill={CHART.axisText}>
                 {reference.label}
               </text>
             </g>

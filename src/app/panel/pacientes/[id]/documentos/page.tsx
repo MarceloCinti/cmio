@@ -33,7 +33,7 @@ export default async function PatientDocumentsPage({ params, searchParams }: Pag
         title={`Documentos · ${patient.firstName} ${patient.lastName}`}
         description="Los archivos se guardan en almacenamiento privado. El paciente solo ve los documentos publicados por un profesional."
       />
-      <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.5fr_1fr]">
         <Card>
           <CardHeader title={`Documentos (${docs.length})`} />
           {docs.length ? (

@@ -19,7 +19,7 @@ export default async function RolesPage() {
       <Alert tone="info">
         El acceso a la historia clínica no es un permiso configurable: corresponde solo a profesionales de la salud con perfil activo y relación de atención con el paciente. Algunos permisos sensibles no pueden asignarse a ciertos roles (por ejemplo, la secretaría nunca exporta historias clínicas). Los cambios se aplican en el próximo acceso de cada persona.
       </Alert>
-      <div className="grid gap-6 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
         {CONFIGURABLE_ROLES.map((role) => (
           <Card key={role}>
             <CardHeader title={ROLE_LABELS[role]} description={ROLE_DESCRIPTIONS[role]} />

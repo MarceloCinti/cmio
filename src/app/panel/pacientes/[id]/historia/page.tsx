@@ -64,7 +64,7 @@ export default async function ClinicalRecordPage({ params, searchParams }: PageP
         </div>
       ) : null}
 
-      <div className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.6fr_1fr]">
         <div className="space-y-6">
           <Card>
             <CardHeader title="Evolución del peso" description={weights.length ? `${weights.length} registro(s) de consultas` : undefined} />

@@ -95,12 +95,12 @@ export function ExceptionForm({ professionalId, clinicWide }: { professionalId?:
   return (
     <ActionForm action={createExceptionAction} resetOnSuccess className="space-y-4">
       {professionalId ? <input type="hidden" name="professionalId" value={professionalId} /> : null}
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <SelectField name="kind" label="Tipo" options={kinds} />
         <TextField name="title" label="Descripción" required placeholder={clinicWide ? "Ej.: Día de la Independencia" : "Ej.: Congreso médico"} />
       </div>
       <CheckboxField name="allDay" label="Días completos" checked={allDay} onChange={(e) => setAllDay(e.target.checked)} />
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <TextField name="startDate" label="Desde" type="date" required />
         <TextField name="endDate" label="Hasta" type="date" required />
         {!allDay ? (

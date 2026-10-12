@@ -41,7 +41,7 @@ export function ColumnChart({
   const total = data.reduce((s, d) => s + d.value, 0);
 
   return (
-    <div ref={wrap} className="relative w-full">
+    <div ref={wrap} className="relative w-full min-w-0">
       <svg width={width} height={height} role="img" aria-label={`${label}. Total: ${total}.`} aria-describedby={tableId} className="block">
         <g transform={`translate(${m.left},${m.top})`}>
           {ticks.map((t) => (

@@ -56,14 +56,14 @@ export function QuerySelect({
 
 export function SegmentedLinks({ items, current, label }: { items: { value: string; label: string; href: string }[]; current: string; label: string }) {
   return (
-    <nav aria-label={label} className="inline-flex rounded-xl border border-line bg-surface p-1">
+    <nav aria-label={label} className="inline-flex max-w-full overflow-x-auto rounded-xl border border-line bg-surface p-1">
       {items.map((i) => (
         <Link
           key={i.value}
           href={i.href}
           aria-current={i.value === current ? "page" : undefined}
           className={cn(
-            "rounded-lg px-3 py-1.5 text-sm font-medium",
+            "shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium whitespace-nowrap",
             i.value === current ? "bg-primary text-white" : "text-ink/80 hover:bg-primary-soft hover:text-primary",
           )}
         >

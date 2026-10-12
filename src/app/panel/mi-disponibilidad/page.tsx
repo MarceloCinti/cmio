@@ -13,7 +13,7 @@ export default async function MyAvailabilityPage() {
   return (
     <div className="space-y-6">
       <PageHeader title="Mi disponibilidad" description="Define tus horarios semanales de atención y registra vacaciones, ausencias o bloqueos." />
-      <div className="grid gap-6 xl:grid-cols-[1.4fr_1fr]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.4fr_1fr]">
         <Card>
           <CardHeader title="Horario semanal" description="Hora de Paraguay." />
           <CardBody>

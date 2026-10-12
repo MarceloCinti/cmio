@@ -58,7 +58,7 @@ export default async function PortalHome() {
               </div>
               <AppointmentStatusBadge status={next.status} />
             </div>
-            <dl className="grid gap-2 text-sm sm:grid-cols-2">
+            <dl className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
               <div>
                 <dt className="text-muted">Profesional</dt>
                 <dd className="font-medium text-ink">{professionalDisplayName(next.professional)}</dd>
@@ -129,7 +129,7 @@ export default async function PortalHome() {
         <h2 id="accesos" className="sr-only">
           Accesos rápidos
         </h2>
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {[
             { href: "/portal/citas", label: "Mis citas", desc: "Próximas e historial", icon: ClipboardList },
             { href: "/portal/documentos", label: "Documentos", desc: newDocs ? `${newDocs} nuevo(s) este mes` : "Resultados e informes", icon: FileText },
