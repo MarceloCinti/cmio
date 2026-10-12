@@ -73,12 +73,17 @@ de la página.
 
 ## Autenticación y autorización
 
-- Contraseñas con **Argon2id**. Mínimo 10 caracteres con letras y números.
+- Contraseñas con **Argon2id**: de 10 a 128 caracteres, se rechazan contraseñas comunes o
+  demasiado simples.
 - **Sesiones en base de datos**: la cookie (`httpOnly`, `SameSite=Lax`, `Secure` y prefijo
   `__Host-` en producción) contiene un token aleatorio; la base guarda solo su SHA-256.
   Duración deslizante: 14 días para pacientes y 12 horas para el personal.
-- **Bloqueo** tras 5 intentos fallidos durante 15 minutos y **límites de intentos** por IP y
-  por correo (registro, ingreso, recuperación, formularios públicos), guardados en la base.
+- **Bloqueo** tras 5 intentos fallidos durante 15 minutos (con el mismo comportamiento para
+  correos sin cuenta, para no revelar cuáles existen) y **límites de intentos** por IP y por
+  correo (registro, ingreso, recuperación, formularios públicos), guardados en la base. La IP
+  se toma solo de la cabecera que agrega el proxy de confianza (`TRUST_PROXY`).
+- El registro y la recuperación responden igual exista o no la cuenta o la ficha: el detalle
+  llega solo al correo indicado.
 - Tokens de un solo uso con hash: verificación de correo (24 h), recuperación (1 h),
   invitación del personal (72 h). Cambiar o restablecer la contraseña cierra las demás sesiones.
 - **Roles**: Propietario, Administrador, Secretaría, Profesional de la salud y Paciente. El
@@ -87,9 +92,12 @@ de la página.
 - **Permisos** por módulo y acción en la tabla `RolePermission`, configurables por el
   propietario dentro de un **límite por rol** (`ROLE_PERMISSION_CEILING` en
   `src/lib/permissions.ts`): por ejemplo, la secretaría nunca puede recibir permisos clínicos.
-- **Acceso clínico**: no es un permiso configurable. Requiere un perfil profesional activo
-  vinculado al usuario **y** una relación de atención con el paciente (citas o consultas).
-  Cada acceso a la historia clínica queda auditado.
+- **Acceso clínico**: no es un permiso configurable. Requiere una cuenta con rol de
+  profesional, vinculada a un perfil profesional activo (solo el propietario puede vincularla,
+  nunca a su propia cuenta) **y** una relación de atención con el paciente: una consulta propia
+  o una cita no cancelada (si la agendó el propio profesional, cuenta desde que el paciente
+  llega). Cada acceso a la historia clínica queda auditado. La exportación completa exige
+  además el permiso `clinica.exportar`, que la administración no puede recibir.
 
 ## Motor de agenda
 
@@ -115,8 +123,9 @@ de la página.
   motivo (`NO_CONFIGURADO`, `CANAL_DESACTIVADO`, `SIN_CONSENTIMIENTO`, …).
 - Reintentos con espera creciente (hasta 5 intentos) y claves de deduplicación; la tarea
   periódica procesa la cola y encola recordatorios.
-- Los correos de seguridad (verificación, recuperación, invitación) se envían en el momento y
-  su contenido no se guarda.
+- Los correos de seguridad (verificación, recuperación, invitación) usan plantillas fijas (no
+  editables desde el panel), se envían en el momento y su contenido no se guarda. El enlace de
+  activación del portal de un paciente nunca se muestra al personal.
 - Las plantillas solo incluyen datos administrativos (fecha, hora, profesional): nunca
   diagnósticos ni tratamientos.
 

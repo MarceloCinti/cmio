@@ -1,0 +1,53 @@
+# Datos y cuentas de demostración
+
+Los datos de demostración sirven para recorrer la plataforma. Son **ficticios** y están
+rotulados como tales ("Profesional Demo …", "Paciente Demo …", códigos `DEMO01`…). Mientras
+`DEMO_MODE=true`, el sitio, el portal y el panel muestran un aviso permanente de entorno de
+demostración.
+
+## Cargar
+
+```bash
+DEMO_MODE=true pnpm db:seed:demo
+```
+
+El script se niega a ejecutarse si `DEMO_MODE` no es `true` o si `NODE_ENV=production`.
+
+## Cuentas
+
+| Rol | Correo | Contraseña |
+|---|---|---|
+| Propietario | `propietario@demo.cmio.local` | `Demo-Propietario-2026` |
+| Administración | `admin@demo.cmio.local` | `Demo-Admin-2026` |
+| Secretaría | `secretaria@demo.cmio.local` | `Demo-Secretaria-2026` |
+| Profesional (clínica médica) | `medico@demo.cmio.local` | `Demo-Medico-2026` |
+| Profesional (nutrición) | `nutricion@demo.cmio.local` | `Demo-Nutricion-2026` |
+| Paciente | `paciente@demo.cmio.local` | `Demo-Paciente-2026` |
+
+Estas contraseñas son públicas: **nunca** cargues datos de demostración en un servidor
+accesible desde internet con datos reales.
+
+## Qué incluye
+
+- Dos perfiles profesionales activos ficticios (clínica médica y nutrición) con horarios, y un
+  perfil en borrador.
+- Cinco pacientes ficticios; "Paciente Demo Uno" tiene acceso al portal.
+- Agenda del día (si es día hábil) para probar la recepción, una próxima cita del paciente
+  con portal y su historial: dos consultas finalizadas, una ausencia y un objetivo de
+  tratamiento.
+
+## Recorridos sugeridos
+
+1. **Paciente** (en el celular): ingresar → agendar una consulta de nutrición → confirmar
+   asistencia → ver seguimiento y documentos.
+2. **Secretaría**: Recepción → registrar llegada → la cita pasa a "En espera"; Agenda →
+   reprogramar una cita; Pacientes → registrar una ficha nueva.
+3. **Profesional (clínica)**: Agenda → iniciar consulta → registrar signos vitales,
+   diagnóstico y receta → finalizar → imprimir la receta (con código de verificación) →
+   agregar una adenda.
+4. **Propietario**: Inicio (indicadores) → Informes → exportar CSV; Contenido → editar el
+   titular → vista previa → publicar; Roles → ajustar permisos; Auditoría.
+
+## Eliminar los datos de demostración
+
+Usa una base nueva para producción: no mezcles datos de demostración con datos reales.
