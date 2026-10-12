@@ -1,0 +1,33 @@
+# dependencias
+node_modules/
+
+# build
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# Prisma (cliente generado)
+src/generated/
+
+# entorno y secretos
+.env
+.env.*
+!.env.example
+
+# datos locales: archivos privados, correos de desarrollo, copias de seguridad
+storage/
+.data/
+backups/
+
+# pruebas
+test-results/
+playwright-report/
+coverage/
+
+# sistema
+.DS_Store
+*.log
+
+# scripts locales de verificación visual
+scripts/.*.mjs

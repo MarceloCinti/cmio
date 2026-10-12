@@ -1,0 +1,966 @@
+// Modelo de datos de la plataforma CMIO.
+// Convenciones:
+// - Todas las fechas/horas se guardan en UTC (timestamptz). La interfaz las
+//   presenta en America/Asuncion.
+// - Los registros clínicos finalizados y la auditoría son inmutables: además de
+//   las reglas en el servidor, hay triggers en la migración SQL que lo impiden.
+// - Las restricciones de exclusión que evitan reservas superpuestas se definen
+//   en SQL (Prisma no las modela) dentro de la migración inicial.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────────────────────
+// Usuarios, sesiones y permisos
+// ─────────────────────────────────────────────────────────────
+
+enum Role {
+  OWNER
+  ADMIN
+  SECRETARY
+  DOCTOR
+  PATIENT
+}
+
+enum UserStatus {
+  PENDING_VERIFICATION
+  INVITED
+  ACTIVE
+  DISABLED
+}
+
+model User {
+  id                String     @id @default(cuid())
+  email             String     @unique
+  passwordHash      String?
+  role              Role
+  status            UserStatus @default(ACTIVE)
+  name              String
+  phone             String?
+  emailVerifiedAt   DateTime?  @db.Timestamptz(3)
+  failedLoginCount  Int        @default(0)
+  lockedUntil       DateTime?  @db.Timestamptz(3)
+  lastLoginAt       DateTime?  @db.Timestamptz(3)
+  passwordChangedAt DateTime?  @db.Timestamptz(3)
+  disabledAt        DateTime?  @db.Timestamptz(3)
+  createdById       String?
+  createdAt         DateTime   @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime   @updatedAt @db.Timestamptz(3)
+
+  sessions      Session[]
+  tokens        AuthToken[]
+  patient       Patient?
+  professional  Professional?
+  notifications Notification[]
+
+  @@index([role, status])
+  @@map("users")
+}
+
+model Session {
+  // id = SHA-256 del token enviado en la cookie. El token en claro nunca se guarda.
+  id           String   @id
+  userId       String
+  expiresAt    DateTime @db.Timestamptz(3)
+  lastActiveAt DateTime @default(now()) @db.Timestamptz(3)
+  createdAt    DateTime @default(now()) @db.Timestamptz(3)
+  ipAddress    String?
+  userAgent    String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+enum TokenPurpose {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+  INVITATION
+}
+
+model AuthToken {
+  id          String       @id @default(cuid())
+  userId      String
+  purpose     TokenPurpose
+  tokenHash   String       @unique
+  expiresAt   DateTime     @db.Timestamptz(3)
+  usedAt      DateTime?    @db.Timestamptz(3)
+  createdById String?
+  createdAt   DateTime     @default(now()) @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, purpose])
+  @@map("auth_tokens")
+}
+
+// Ventanas de limitación de solicitudes (login, recuperación, formularios públicos).
+model RateLimit {
+  key     String   @id
+  count   Int
+  resetAt DateTime @db.Timestamptz(3)
+
+  @@index([resetAt])
+  @@map("rate_limits")
+}
+
+// Permisos configurables por rol. El propietario tiene todos los permisos de forma
+// implícita; el paciente no tiene permisos administrativos.
+model RolePermission {
+  role        Role
+  permission  String
+  updatedById String?
+  updatedAt   DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+
+  @@id([role, permission])
+  @@map("role_permissions")
+}
+
+// ─────────────────────────────────────────────────────────────
+// Pacientes
+// ─────────────────────────────────────────────────────────────
+
+enum DocumentType {
+  CI
+  PASSPORT
+  OTHER
+}
+
+enum Sex {
+  FEMALE
+  MALE
+  OTHER
+  UNDISCLOSED
+}
+
+model Patient {
+  id                    String        @id @default(cuid())
+  userId                String?       @unique
+  firstName             String
+  lastName              String
+  documentType          DocumentType  @default(CI)
+  documentNumber        String?
+  birthDate             DateTime?     @db.Date
+  sex                   Sex?
+  phone                 String?
+  email                 String?
+  city                  String?
+  address               String?
+  emergencyContactName  String?
+  emergencyContactPhone String?
+  insuranceProvider     String?
+  // Observaciones administrativas NO clínicas (secretaría).
+  adminNotes            String?
+  // Habilitado por un profesional: el paciente ve su evolución en el portal.
+  portalProgressEnabled Boolean       @default(false)
+  archivedAt            DateTime?     @db.Timestamptz(3)
+  createdById           String?
+  createdAt             DateTime      @default(now()) @db.Timestamptz(3)
+  updatedAt             DateTime      @updatedAt @db.Timestamptz(3)
+
+  user                User?               @relation(fields: [userId], references: [id])
+  consents            Consent[]
+  appointments        Appointment[]
+  backgrounds         ClinicalBackground[]
+  encounters          Encounter[]
+  vitalSigns          VitalSign[]
+  diagnoses           Diagnosis[]
+  prescriptions       Prescription[]
+  studyOrders         StudyOrder[]
+  documents           ClinicalDocument[]
+  goals               TreatmentGoal[]
+
+  @@unique([documentType, documentNumber])
+  @@index([lastName, firstName])
+  @@index([phone])
+  @@map("patients")
+}
+
+enum ConsentType {
+  DATA_PROCESSING
+  EMAIL_NOTIFICATIONS
+  WHATSAPP_NOTIFICATIONS
+}
+
+// Registro histórico (solo inserciones): el último registro por tipo es el vigente.
+model Consent {
+  id            String      @id @default(cuid())
+  patientId     String
+  type          ConsentType
+  granted       Boolean
+  policyVersion String
+  source        String
+  recordedById  String?
+  createdAt     DateTime    @default(now()) @db.Timestamptz(3)
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@index([patientId, type, createdAt])
+  @@map("consents")
+}
+
+// ─────────────────────────────────────────────────────────────
+// Catálogo: especialidades, servicios y profesionales
+// ─────────────────────────────────────────────────────────────
+
+model Specialty {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  summary     String
+  description String?
+  imagePath   String?
+  imageAlt    String?
+  isPublished Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+
+  services      Service[]
+  professionals ProfessionalSpecialty[]
+  requests      ContactRequest[]
+
+  @@map("specialties")
+}
+
+enum ServiceCategory {
+  CONSULTATION
+  EVALUATION
+  IMAGING
+  CARDIOLOGY_TEST
+  LABORATORY
+  FOLLOW_UP
+  OTHER
+}
+
+model Service {
+  id                    String          @id @default(cuid())
+  slug                  String          @unique
+  name                  String
+  summary               String
+  description           String?
+  category              ServiceCategory @default(CONSULTATION)
+  specialtyId           String?
+  durationMinutes       Int             @default(30)
+  // Precio en guaraníes (sin decimales). Nulo = no informado.
+  price                 Int?
+  showPrice             Boolean         @default(false)
+  // Debe confirmarlo el administrador antes de mostrarse al público.
+  availabilityConfirmed Boolean         @default(false)
+  isPublished           Boolean         @default(false)
+  bookableOnline        Boolean         @default(false)
+  capacityPerSlot       Int             @default(1)
+  preparationNotes      String?
+  imagePath             String?
+  imageAlt              String?
+  sortOrder             Int             @default(0)
+  createdAt             DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt             DateTime        @updatedAt @db.Timestamptz(3)
+
+  specialty     Specialty?            @relation(fields: [specialtyId], references: [id], onDelete: SetNull)
+  professionals ProfessionalService[]
+  appointments  Appointment[]
+  requests      ContactRequest[]
+
+  @@map("services")
+}
+
+enum ProfessionalStatus {
+  DRAFT
+  ACTIVE
+  INACTIVE
+}
+
+model Professional {
+  id                     String             @id @default(cuid())
+  userId                 String?            @unique
+  slug                   String             @unique
+  honorific              String?
+  firstName              String
+  lastName               String
+  licenseNumber          String?
+  credentials            String?
+  credentialsVerifiedAt  DateTime?          @db.Timestamptz(3)
+  credentialsVerifiedBy  String?
+  bio                    String?
+  photoPath              String?
+  status                 ProfessionalStatus @default(DRAFT)
+  isPublished            Boolean            @default(false)
+  acceptsOnlineBooking   Boolean            @default(true)
+  agendaColor            String?
+  sortOrder              Int                @default(0)
+  createdAt              DateTime           @default(now()) @db.Timestamptz(3)
+  updatedAt              DateTime           @updatedAt @db.Timestamptz(3)
+
+  user          User?                   @relation(fields: [userId], references: [id])
+  specialties   ProfessionalSpecialty[]
+  services      ProfessionalService[]
+  scheduleRules ScheduleRule[]
+  exceptions    ScheduleException[]
+  appointments  Appointment[]
+  encounters    Encounter[]
+  prescriptions Prescription[]
+  studyOrders   StudyOrder[]
+  goals         TreatmentGoal[]
+
+  @@map("professionals")
+}
+
+model ProfessionalSpecialty {
+  professionalId String
+  specialtyId    String
+
+  professional Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  specialty    Specialty    @relation(fields: [specialtyId], references: [id], onDelete: Cascade)
+
+  @@id([professionalId, specialtyId])
+  @@map("professional_specialties")
+}
+
+model ProfessionalService {
+  professionalId String
+  serviceId      String
+
+  professional Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  service      Service      @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@id([professionalId, serviceId])
+  @@map("professional_services")
+}
+
+// ─────────────────────────────────────────────────────────────
+// Agenda
+// ─────────────────────────────────────────────────────────────
+
+// Bloque semanal de atención en hora local de Paraguay.
+// weekday: 1 = lunes … 7 = domingo. Minutos desde las 00:00.
+model ScheduleRule {
+  id             String    @id @default(cuid())
+  professionalId String
+  weekday        Int
+  startMinute    Int
+  endMinute      Int
+  validFrom      DateTime? @db.Date
+  validUntil     DateTime? @db.Date
+  createdAt      DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime  @updatedAt @db.Timestamptz(3)
+
+  professional Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+
+  @@index([professionalId, weekday])
+  @@map("schedule_rules")
+}
+
+enum ExceptionKind {
+  HOLIDAY
+  CLOSURE
+  VACATION
+  ABSENCE
+  BLOCK
+}
+
+// Bloqueos de agenda. professionalId nulo = afecta a toda la clínica (feriado/cierre).
+model ScheduleException {
+  id             String        @id @default(cuid())
+  professionalId String?
+  kind           ExceptionKind
+  title          String
+  startsAt       DateTime      @db.Timestamptz(3)
+  endsAt         DateTime      @db.Timestamptz(3)
+  createdById    String?
+  createdAt      DateTime      @default(now()) @db.Timestamptz(3)
+
+  professional Professional? @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+
+  @@index([professionalId, startsAt])
+  @@index([startsAt, endsAt])
+  @@map("schedule_exceptions")
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  CONFIRMED
+  CHECKED_IN
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum AppointmentSource {
+  PORTAL
+  STAFF
+}
+
+model Appointment {
+  id                 String            @id @default(cuid())
+  code               String            @unique
+  patientId          String
+  professionalId     String
+  serviceId          String
+  startsAt           DateTime          @db.Timestamptz(3)
+  endsAt             DateTime          @db.Timestamptz(3)
+  status             AppointmentStatus @default(SCHEDULED)
+  source             AppointmentSource
+  // true = ocupa el horario en exclusiva (restricción de exclusión en SQL).
+  blocksSlot         Boolean           @default(true)
+  isOverbook         Boolean           @default(false)
+  patientComment     String?
+  adminNotes         String?
+  cancellationReason String?
+  cancelledAt        DateTime?         @db.Timestamptz(3)
+  cancelledById      String?
+  confirmedAt        DateTime?         @db.Timestamptz(3)
+  checkedInAt        DateTime?         @db.Timestamptz(3)
+  startedAt          DateTime?         @db.Timestamptz(3)
+  completedAt        DateTime?         @db.Timestamptz(3)
+  reminderQueuedAt   DateTime?         @db.Timestamptz(3)
+  createdById        String?
+  createdAt          DateTime          @default(now()) @db.Timestamptz(3)
+  updatedAt          DateTime          @updatedAt @db.Timestamptz(3)
+
+  patient      Patient            @relation(fields: [patientId], references: [id])
+  professional Professional       @relation(fields: [professionalId], references: [id])
+  service      Service            @relation(fields: [serviceId], references: [id])
+  events       AppointmentEvent[]
+  encounter    Encounter?
+  messages     OutboundMessage[]
+
+  @@index([professionalId, startsAt])
+  @@index([patientId, startsAt])
+  @@index([status, startsAt])
+  @@map("appointments")
+}
+
+enum AppointmentEventType {
+  CREATED
+  STATUS_CHANGED
+  RESCHEDULED
+  UPDATED
+}
+
+model AppointmentEvent {
+  id               String                @id @default(cuid())
+  appointmentId    String
+  type             AppointmentEventType
+  fromStatus       AppointmentStatus?
+  toStatus         AppointmentStatus?
+  previousStartsAt DateTime?             @db.Timestamptz(3)
+  newStartsAt      DateTime?             @db.Timestamptz(3)
+  reason           String?
+  actorId          String?
+  actorName        String?
+  createdAt        DateTime              @default(now()) @db.Timestamptz(3)
+
+  appointment Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+  @@index([appointmentId, createdAt])
+  @@map("appointment_events")
+}
+
+enum ContactKind {
+  APPOINTMENT
+  GENERAL
+}
+
+enum ContactStatus {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+  DISCARDED
+}
+
+// Solicitudes recibidas desde el sitio público (sin cuenta).
+model ContactRequest {
+  id                String        @id @default(cuid())
+  kind              ContactKind
+  fullName          String
+  phone             String
+  email             String?
+  specialtyId       String?
+  serviceId         String?
+  preferredSchedule String?
+  message           String?
+  consentAccepted   Boolean
+  status            ContactStatus @default(NEW)
+  internalNote      String?
+  handledById       String?
+  handledAt         DateTime?     @db.Timestamptz(3)
+  createdAt         DateTime      @default(now()) @db.Timestamptz(3)
+
+  specialty Specialty? @relation(fields: [specialtyId], references: [id], onDelete: SetNull)
+  service   Service?   @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@map("contact_requests")
+}
+
+// ─────────────────────────────────────────────────────────────
+// Historia clínica electrónica
+// ─────────────────────────────────────────────────────────────
+
+// Antecedentes versionados: cada guardado crea una nueva versión (solo inserciones).
+model ClinicalBackground {
+  id                 String   @id @default(cuid())
+  patientId          String
+  version            Int
+  allergies          String?
+  currentMedications String?
+  personalHistory    String?
+  familyHistory      String?
+  surgicalHistory    String?
+  habits             String?
+  notes              String?
+  authorId           String
+  authorName         String
+  createdAt          DateTime @default(now()) @db.Timestamptz(3)
+
+  patient Patient @relation(fields: [patientId], references: [id])
+
+  @@unique([patientId, version])
+  @@map("clinical_backgrounds")
+}
+
+enum EncounterStatus {
+  DRAFT
+  FINALIZED
+}
+
+model Encounter {
+  id                       String          @id @default(cuid())
+  patientId                String
+  professionalId           String
+  appointmentId            String?         @unique
+  status                   EncounterStatus @default(DRAFT)
+  reason                   String
+  currentIllness           String?
+  physicalExam             String?
+  assessment               String?
+  plan                     String?
+  followUpInstructions     String?
+  patientInstructions      String?
+  sharePatientInstructions Boolean         @default(false)
+  clinicalNotes            String?
+  nextEvaluationDate       DateTime?       @db.Date
+  authorId                 String
+  authorName               String
+  startedAt                DateTime        @default(now()) @db.Timestamptz(3)
+  finalizedAt              DateTime?       @db.Timestamptz(3)
+  createdAt                DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt                DateTime        @updatedAt @db.Timestamptz(3)
+
+  patient       Patient             @relation(fields: [patientId], references: [id])
+  professional  Professional        @relation(fields: [professionalId], references: [id])
+  appointment   Appointment?        @relation(fields: [appointmentId], references: [id])
+  vitalSigns    VitalSign[]
+  diagnoses     Diagnosis[]
+  prescriptions Prescription[]
+  studyOrders   StudyOrder[]
+  addenda       EncounterAddendum[]
+  documents     ClinicalDocument[]
+
+  @@index([patientId, startedAt])
+  @@index([professionalId, startedAt])
+  @@map("encounters")
+}
+
+// Correcciones o agregados posteriores a la finalización (inmutables).
+model EncounterAddendum {
+  id          String   @id @default(cuid())
+  encounterId String
+  content     String
+  reason      String?
+  authorId    String
+  authorName  String
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+
+  encounter Encounter @relation(fields: [encounterId], references: [id])
+
+  @@index([encounterId])
+  @@map("encounter_addenda")
+}
+
+model VitalSign {
+  id              String   @id @default(cuid())
+  patientId       String
+  encounterId     String?
+  measuredAt      DateTime @db.Timestamptz(3)
+  weightKg        Decimal? @db.Decimal(5, 1)
+  heightCm        Decimal? @db.Decimal(5, 1)
+  bmi             Decimal? @db.Decimal(4, 1)
+  waistCm         Decimal? @db.Decimal(5, 1)
+  hipCm           Decimal? @db.Decimal(5, 1)
+  bodyFatPct      Decimal? @db.Decimal(4, 1)
+  systolic        Int?
+  diastolic       Int?
+  heartRate       Int?
+  respiratoryRate Int?
+  temperatureC    Decimal? @db.Decimal(3, 1)
+  spo2            Int?
+  recordedById    String
+  createdAt       DateTime @default(now()) @db.Timestamptz(3)
+
+  patient   Patient    @relation(fields: [patientId], references: [id])
+  encounter Encounter? @relation(fields: [encounterId], references: [id])
+
+  @@index([patientId, measuredAt])
+  @@map("vital_signs")
+}
+
+enum DiagnosisKind {
+  PRINCIPAL
+  SECONDARY
+}
+
+enum DiagnosisCertainty {
+  PRESUMPTIVE
+  CONFIRMED
+}
+
+model Diagnosis {
+  id          String             @id @default(cuid())
+  encounterId String
+  patientId   String
+  code        String?
+  description String
+  kind        DiagnosisKind      @default(PRINCIPAL)
+  certainty   DiagnosisCertainty @default(PRESUMPTIVE)
+  createdAt   DateTime           @default(now()) @db.Timestamptz(3)
+
+  encounter Encounter @relation(fields: [encounterId], references: [id])
+  patient   Patient   @relation(fields: [patientId], references: [id])
+
+  @@index([patientId])
+  @@map("diagnoses")
+}
+
+enum ClinicalOrderStatus {
+  DRAFT
+  ISSUED
+  VOIDED
+}
+
+model Prescription {
+  id               String              @id @default(cuid())
+  encounterId      String
+  patientId        String
+  professionalId   String
+  verificationCode String              @unique
+  notes            String?
+  status           ClinicalOrderStatus @default(DRAFT)
+  issuedAt         DateTime?           @db.Timestamptz(3)
+  voidedAt         DateTime?           @db.Timestamptz(3)
+  voidReason       String?
+  createdAt        DateTime            @default(now()) @db.Timestamptz(3)
+
+  encounter    Encounter          @relation(fields: [encounterId], references: [id])
+  patient      Patient            @relation(fields: [patientId], references: [id])
+  professional Professional       @relation(fields: [professionalId], references: [id])
+  items        PrescriptionItem[]
+
+  @@index([patientId])
+  @@map("prescriptions")
+}
+
+model PrescriptionItem {
+  id             String  @id @default(cuid())
+  prescriptionId String
+  medication     String
+  dose           String?
+  frequency      String?
+  duration       String?
+  quantity       String?
+  instructions   String?
+  sortOrder      Int     @default(0)
+
+  prescription Prescription @relation(fields: [prescriptionId], references: [id], onDelete: Cascade)
+
+  @@map("prescription_items")
+}
+
+model StudyOrder {
+  id               String              @id @default(cuid())
+  encounterId      String
+  patientId        String
+  professionalId   String
+  verificationCode String              @unique
+  studies          String[]
+  indication       String?
+  isUrgent         Boolean             @default(false)
+  status           ClinicalOrderStatus @default(DRAFT)
+  issuedAt         DateTime?           @db.Timestamptz(3)
+  voidedAt         DateTime?           @db.Timestamptz(3)
+  voidReason       String?
+  createdAt        DateTime            @default(now()) @db.Timestamptz(3)
+
+  encounter    Encounter    @relation(fields: [encounterId], references: [id])
+  patient      Patient      @relation(fields: [patientId], references: [id])
+  professional Professional @relation(fields: [professionalId], references: [id])
+
+  @@index([patientId])
+  @@map("study_orders")
+}
+
+enum GoalMetric {
+  WEIGHT
+  WAIST
+  BMI
+  OTHER
+}
+
+enum GoalStatus {
+  ACTIVE
+  ACHIEVED
+  DISCONTINUED
+}
+
+model TreatmentGoal {
+  id               String     @id @default(cuid())
+  patientId        String
+  professionalId   String
+  description      String
+  metric           GoalMetric @default(OTHER)
+  targetValue      Decimal?   @db.Decimal(6, 1)
+  targetDate       DateTime?  @db.Date
+  status           GoalStatus @default(ACTIVE)
+  visibleToPatient Boolean    @default(true)
+  createdAt        DateTime   @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime   @updatedAt @db.Timestamptz(3)
+
+  patient      Patient      @relation(fields: [patientId], references: [id])
+  professional Professional @relation(fields: [professionalId], references: [id])
+
+  @@index([patientId])
+  @@map("treatment_goals")
+}
+
+enum DocumentCategory {
+  LAB_RESULT
+  IMAGING_REPORT
+  MEDICAL_REPORT
+  PRESCRIPTION
+  STUDY_ORDER
+  OTHER
+}
+
+enum DocumentStatus {
+  PENDING_REVIEW
+  PUBLISHED
+  WITHDRAWN
+}
+
+model ClinicalDocument {
+  id              String           @id @default(cuid())
+  patientId       String
+  encounterId     String?
+  category        DocumentCategory
+  title           String
+  description     String?
+  storageKey      String           @unique
+  originalName    String
+  mimeType        String
+  sizeBytes       Int
+  sha256          String
+  status          DocumentStatus   @default(PENDING_REVIEW)
+  uploadedById    String
+  uploadedByName  String
+  reviewedById    String?
+  reviewedByName  String?
+  publishedAt     DateTime?        @db.Timestamptz(3)
+  withdrawnAt     DateTime?        @db.Timestamptz(3)
+  withdrawnReason String?
+  createdAt       DateTime         @default(now()) @db.Timestamptz(3)
+
+  patient   Patient    @relation(fields: [patientId], references: [id])
+  encounter Encounter? @relation(fields: [encounterId], references: [id])
+
+  @@index([patientId, status])
+  @@map("clinical_documents")
+}
+
+// ─────────────────────────────────────────────────────────────
+// Notificaciones y mensajería
+// ─────────────────────────────────────────────────────────────
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  title     String
+  body      String
+  href      String?
+  readAt    DateTime? @db.Timestamptz(3)
+  createdAt DateTime  @default(now()) @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+  @@map("notifications")
+}
+
+enum MessageChannel {
+  EMAIL
+  WHATSAPP
+}
+
+enum MessageEvent {
+  APPOINTMENT_BOOKED
+  APPOINTMENT_CONFIRMED
+  APPOINTMENT_RESCHEDULED
+  APPOINTMENT_CANCELLED
+  APPOINTMENT_REMINDER
+  DOCUMENT_PUBLISHED
+  ADMIN_NOTICE
+  ACCOUNT_VERIFICATION
+  PASSWORD_RESET
+  STAFF_INVITATION
+}
+
+model MessageTemplate {
+  id                   String         @id @default(cuid())
+  event                MessageEvent
+  channel              MessageChannel
+  subject              String?
+  body                 String
+  // Para WhatsApp Cloud API: nombre de la plantilla aprobada por Meta.
+  whatsappTemplateName String?
+  whatsappLanguage     String?        @default("es")
+  isActive             Boolean        @default(true)
+  updatedById          String?
+  updatedAt            DateTime       @updatedAt @db.Timestamptz(3)
+
+  @@unique([event, channel])
+  @@map("message_templates")
+}
+
+enum MessageStatus {
+  PENDING
+  SENT
+  FAILED
+  SKIPPED
+}
+
+model OutboundMessage {
+  id                String         @id @default(cuid())
+  channel           MessageChannel
+  event             MessageEvent
+  recipient         String
+  userId            String?
+  patientId         String?
+  appointmentId     String?
+  subject           String?
+  // Nulo para mensajes con enlaces sensibles (p. ej., recuperación de contraseña).
+  body              String?
+  status            MessageStatus  @default(PENDING)
+  skipReason        String?
+  attempts          Int            @default(0)
+  lastError         String?
+  nextAttemptAt     DateTime?      @db.Timestamptz(3)
+  providerMessageId String?
+  dedupeKey         String?        @unique
+  sentAt            DateTime?      @db.Timestamptz(3)
+  createdAt         DateTime       @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime       @updatedAt @db.Timestamptz(3)
+
+  appointment Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+
+  @@index([status, nextAttemptAt])
+  @@index([createdAt])
+  @@map("outbound_messages")
+}
+
+// ─────────────────────────────────────────────────────────────
+// Contenido institucional y configuración
+// ─────────────────────────────────────────────────────────────
+
+// Contenido del sitio con borrador y versión publicada (vista previa antes de publicar).
+model SiteContent {
+  key           String    @id
+  draft         Json
+  published     Json
+  updatedById   String?
+  updatedAt     DateTime  @updatedAt @db.Timestamptz(3)
+  publishedById String?
+  publishedAt   DateTime? @db.Timestamptz(3)
+
+  @@map("site_content")
+}
+
+model SiteContentVersion {
+  id            String   @id @default(cuid())
+  key           String
+  data          Json
+  publishedById String?
+  publishedAt   DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([key, publishedAt])
+  @@map("site_content_versions")
+}
+
+// Parámetros operativos (políticas de agenda, notificaciones). Separados del contenido.
+model SystemSetting {
+  key         String   @id
+  value       Json
+  updatedById String?
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+
+  @@map("system_settings")
+}
+
+model Faq {
+  id          String   @id @default(cuid())
+  question    String
+  answer      String
+  sortOrder   Int      @default(0)
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+
+  @@map("faqs")
+}
+
+// Imágenes públicas subidas desde el panel (logotipo, fotos de perfil, etc.).
+model MediaAsset {
+  id           String   @id @default(cuid())
+  storageKey   String   @unique
+  mimeType     String
+  sizeBytes    Int
+  originalName String
+  uploadedById String?
+  createdAt    DateTime @default(now()) @db.Timestamptz(3)
+
+  @@map("media_assets")
+}
+
+// ─────────────────────────────────────────────────────────────
+// Auditoría (inmutable: triggers impiden UPDATE/DELETE)
+// ─────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  actorId    String?
+  actorName  String?
+  actorRole  Role?
+  action     String
+  entityType String?
+  entityId   String?
+  patientId  String?
+  success    Boolean  @default(true)
+  ipAddress  String?
+  userAgent  String?
+  details    Json?
+
+  @@index([createdAt])
+  @@index([actorId, createdAt])
+  @@index([patientId, createdAt])
+  @@index([action, createdAt])
+  @@map("audit_logs")
+}
