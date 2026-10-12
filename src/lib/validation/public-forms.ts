@@ -12,7 +12,7 @@ export const contactFormSchema = z.object({
     .max(1000, "El mensaje debe tener como máximo 1000 caracteres."),
   consent: z.preprocess((v) => v === "on" || v === "true", z.literal(true, { error: "Debes aceptar el aviso de tratamiento de datos para enviar el formulario." })),
   // Campo trampa para bots: debe quedar vacío.
-  website: z.string().max(0).optional(),
+  website: z.string().max(200).optional(),
 });
 
 export const appointmentRequestSchema = z.object({
@@ -23,7 +23,7 @@ export const appointmentRequestSchema = z.object({
   preferredSchedule: optionalText(200),
   message: optionalText(600),
   consent: z.preprocess((v) => v === "on" || v === "true", z.literal(true, { error: "Debes aceptar el aviso de tratamiento de datos para enviar la solicitud." })),
-  website: z.string().max(0).optional(),
+  website: z.string().max(200).optional(),
 });
 
 export type ContactFormInput = z.infer<typeof contactFormSchema>;
