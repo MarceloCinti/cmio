@@ -864,6 +864,8 @@ model OutboundMessage {
   lastError         String?
   nextAttemptAt     DateTime?      @db.Timestamptz(3)
   providerMessageId String?
+  // Estado informado por el proveedor (p. ej., WhatsApp: delivered, read, failed).
+  deliveryStatus    String?
   dedupeKey         String?        @unique
   sentAt            DateTime?      @db.Timestamptz(3)
   createdAt         DateTime       @default(now()) @db.Timestamptz(3)
@@ -873,6 +875,7 @@ model OutboundMessage {
 
   @@index([status, nextAttemptAt])
   @@index([createdAt])
+  @@index([providerMessageId])
   @@map("outbound_messages")
 }
 

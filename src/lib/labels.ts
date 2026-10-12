@@ -107,6 +107,14 @@ export const MESSAGE_SKIP_REASONS: Record<string, string> = {
   SIN_PLANTILLA: "Plantilla inactiva o inexistente",
 };
 
+/** Estados informados por el webhook de WhatsApp Cloud API. */
+export const DELIVERY_STATUS_LABELS: Record<string, string> = {
+  sent: "aceptado",
+  delivered: "entregado",
+  read: "leído",
+  failed: "no entregado",
+};
+
 export const ENCOUNTER_STATUS_LABELS = { DRAFT: "Borrador", FINALIZED: "Finalizada" } as const;
 
 export const DIAGNOSIS_KIND_LABELS = { PRINCIPAL: "Principal", SECONDARY: "Secundario" } as const;

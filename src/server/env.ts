@@ -26,6 +26,8 @@ const schema = z.object({
   WHATSAPP_PHONE_NUMBER_ID: z.string().optional(),
   WHATSAPP_ACCESS_TOKEN: z.string().optional(),
   WHATSAPP_API_VERSION: z.string().default("v21.0"),
+  WHATSAPP_WEBHOOK_VERIFY_TOKEN: z.string().optional(),
+  WHATSAPP_APP_SECRET: z.string().optional(),
 
   STORAGE_DRIVER: z.enum(["local"]).default("local"),
   STORAGE_LOCAL_PATH: z.string().default("./storage"),
@@ -34,7 +36,9 @@ const schema = z.object({
 export type Env = z.infer<typeof schema>;
 
 function load(): Env {
-  const parsed = schema.safeParse(process.env);
+  // Las variables vacías (p. ej., copiadas de .env.example) se tratan como no definidas.
+  const raw = Object.fromEntries(Object.entries(process.env).filter(([, v]) => v !== undefined && v !== ""));
+  const parsed = schema.safeParse(raw);
   if (!parsed.success) {
     const issues = parsed.error.issues.map((i) => `- ${i.path.join(".")}: ${i.message}`).join("\n");
     throw new Error(`Configuración de entorno inválida:\n${issues}`);
@@ -59,3 +63,9 @@ export function env(): Env {
 }
 
 export const isProduction = () => env().NODE_ENV === "production";
+
+/** Solo para pruebas: vuelve a leer las variables de entorno. */
+export function resetEnvCacheForTests() {
+  if (process.env.NODE_ENV !== "test") return;
+  cached = undefined;
+}

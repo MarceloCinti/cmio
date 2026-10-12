@@ -9,7 +9,7 @@ import { TemplateForm } from "@/components/panel/template-form";
 import { requirePermission } from "@/server/auth/current";
 import { listOutboundMessages, listTemplates } from "@/server/services/messages-admin";
 import { MESSAGE_EVENT_LABELS, SECURITY_EVENTS, TEMPLATE_VARIABLES, type MessageEventKey } from "@/lib/message-templates";
-import { MESSAGE_SKIP_REASONS, MESSAGE_STATUS_LABELS } from "@/lib/labels";
+import { DELIVERY_STATUS_LABELS, MESSAGE_SKIP_REASONS, MESSAGE_STATUS_LABELS } from "@/lib/labels";
 import { formatDateTime } from "@/lib/format";
 import type { MessageStatus } from "@/generated/prisma/client";
 import { retryMessageAction } from "../admin-actions";
@@ -70,6 +70,7 @@ async function Log({ status, page, actorP }: { status?: MessageStatus; page: num
                     {formatDateTime(m.createdAt)} · intentos: {m.attempts}
                     {m.sentAt ? ` · enviado ${formatDateTime(m.sentAt)}` : ""}
                     {m.skipReason ? ` · ${MESSAGE_SKIP_REASONS[m.skipReason] ?? m.skipReason}` : ""}
+                    {m.deliveryStatus ? ` · proveedor: ${DELIVERY_STATUS_LABELS[m.deliveryStatus] ?? m.deliveryStatus}` : ""}
                   </p>
                   {m.lastError ? <p className="mt-1 text-xs break-words text-red-800">{m.lastError}</p> : null}
                 </div>

@@ -16,6 +16,11 @@ export type SendResult = { providerMessageId?: string };
 
 let transporter: Transporter | undefined;
 
+/** Solo para pruebas: descarta el transporte SMTP en memoria. */
+export function resetEmailTransportForTests() {
+  transporter = undefined;
+}
+
 export function emailStatus(): { configured: boolean; driver: string; detail: string } {
   const e = env();
   if (e.EMAIL_DRIVER === "smtp") {
