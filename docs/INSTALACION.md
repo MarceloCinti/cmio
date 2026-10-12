@@ -1,5 +1,32 @@
 # Instalación y ejecución local
 
+## Modo rápido: ver la plataforma en tu computadora
+
+Para recorrer la plataforma con datos ficticios de demostración (Windows, macOS o Linux):
+
+1. Instala **Node.js 22 LTS** (https://nodejs.org), **Git** y **Docker Desktop**.
+2. Habilita pnpm: `corepack enable` (si falla: `npm install -g pnpm@10`).
+3. Inicia PostgreSQL con Docker (una sola vez):
+
+   ```bash
+   docker run -d --name cmio-postgres -e POSTGRES_USER=cmio -e POSTGRES_PASSWORD=cmio_local -e POSTGRES_DB=cmio_dev -p 5432:5432 postgres:16
+   ```
+
+   Las siguientes veces basta con `docker start cmio-postgres`.
+4. En la carpeta del proyecto:
+
+   ```bash
+   pnpm install
+   pnpm local:setup     # crea .env de desarrollo, migra y carga datos base y de demostración
+   pnpm dev
+   ```
+
+5. Abre http://localhost:3000 e ingresa con una cuenta de [DEMO.md](DEMO.md).
+
+`pnpm local:setup` no modifica un `.env` existente y puede ejecutarse varias veces. Los
+correos no se envían: quedan como archivos en `.data/mail` (allí están, por ejemplo, los
+enlaces de verificación de cuentas nuevas).
+
 ## Requisitos
 
 - Node.js **22.12** o superior y **pnpm 10** (`corepack enable`).

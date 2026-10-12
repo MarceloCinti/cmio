@@ -33,6 +33,10 @@ DEMO_MODE=true pnpm db:seed:demo   # opcional: datos ficticios de demostración
 pnpm dev                        # http://localhost:3000
 ```
 
+Para solo **ver la plataforma en tu computadora** con datos de demostración:
+`pnpm install && pnpm local:setup && pnpm dev` (requiere PostgreSQL; ver el "Modo rápido"
+de la guía).
+
 Guía completa: [docs/INSTALACION.md](docs/INSTALACION.md).
 
 ## Comandos
@@ -47,6 +51,7 @@ Guía completa: [docs/INSTALACION.md](docs/INSTALACION.md).
 | `pnpm db:deploy` | Aplica migraciones pendientes |
 | `pnpm db:seed` | Datos base idempotentes |
 | `pnpm db:seed:demo` | Datos ficticios (solo con `DEMO_MODE=true`, nunca en producción) |
+| `pnpm local:setup` | Prepara una instalación local de demostración (`.env`, migraciones y datos) |
 | `scripts/respaldo.sh` / `scripts/restaurar.sh` | Respaldo y restauración (base + archivos) |
 
 ## Documentación
