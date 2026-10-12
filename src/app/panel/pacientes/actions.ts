@@ -28,29 +28,23 @@ export async function updatePatientAction(_: ActionState, formData: FormData): P
   }, "Datos del paciente actualizados.");
 }
 
-export async function invitePatientAction(_: ActionState, formData: FormData): Promise<ActionState<{ link?: string }>> {
+export async function invitePatientAction(_: ActionState, formData: FormData): Promise<ActionState> {
   const actor = await requireStaff();
   const id = String(formData.get("patientId") ?? "");
-  let link: string | undefined;
   let sent = false;
   const result = await runAction(async () => {
-    const res = await invitePatientToPortal(actor, id);
-    link = res.link;
-    sent = res.sent;
+    sent = (await invitePatientToPortal(actor, id)).sent;
     revalidatePath(`/panel/pacientes/${id}`);
-    return { link };
   });
   if (result?.ok) {
-    return {
-      ok: true,
-      at: Date.now(),
-      data: { link },
-      message: sent
-        ? link
-          ? "Invitación generada (modo de desarrollo: el correo se guardó localmente)."
-          : "Invitación enviada por correo electrónico."
-        : "No hay envío de correos configurado. Comparte el enlace de invitación de forma segura con el paciente.",
-    };
+    return sent
+      ? { ok: true, at: Date.now(), message: "Invitación enviada al correo electrónico registrado del paciente." }
+      : {
+          ok: false,
+          at: Date.now(),
+          message:
+            "No se pudo enviar la invitación porque el correo electrónico no está configurado. Por seguridad, el enlace solo se envía al correo del paciente: configura el envío de correos y vuelve a intentarlo.",
+        };
   }
   return result;
 }

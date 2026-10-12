@@ -7,6 +7,8 @@ import { processMessageQueue, queueMessage, sendSecurityEmail } from "@/server/s
 import { notifyAppointmentEvent } from "@/server/services/appointment-notifications";
 import { bookAppointment } from "@/server/services/appointments";
 import { updateSystemSetting } from "@/server/services/settings";
+import { updateTemplate } from "@/server/services/messages-admin";
+import { ForbiddenError } from "@/server/errors";
 import { runScheduledJobs } from "@/server/services/maintenance";
 import { DEFAULT_NOTIFICATION_SETTINGS } from "@/lib/system-settings";
 import { addDaysISO, localToUtc, todayISO } from "@/lib/time";
@@ -115,6 +117,27 @@ describe("Mensajería y recuperación ante fallos", () => {
     const result = await runScheduledJobs();
     expect(result.sent).toBeGreaterThanOrEqual(1);
     expect(await db.outboundMessage.count({ where: { status: "PENDING" } })).toBe(0);
+  });
+});
+
+describe("Plantillas de seguridad", () => {
+  beforeEach(async () => {
+    await resetDatabase();
+    setEnv({ EMAIL_DRIVER: "file", WHATSAPP_PROVIDER: "disabled" });
+  });
+
+  it("no se pueden editar y el enlace de un solo uso nunca se guarda", async () => {
+    const admin = await actorFor((await createUser("ADMIN")).id);
+    const tpl = await db.messageTemplate.create({
+      data: { event: "PASSWORD_RESET", channel: "EMAIL", subject: "Restablecer {{enlace}}", body: "https://otro-sitio.example/?r={{enlace}}" },
+    });
+    await expect(updateTemplate(admin, tpl.id, { subject: "x", body: "{{enlace}}", isActive: "on" })).rejects.toBeInstanceOf(ForbiddenError);
+    // Aunque la base tuviera una plantilla alterada, se usa la plantilla fija del sistema.
+    const res = await sendSecurityEmail({ event: "PASSWORD_RESET", to: "a@prueba.local", name: "Ana", link: "http://localhost/restablecer?token=SECRETO" });
+    expect(res.sent).toBe(true);
+    const row = await db.outboundMessage.findFirstOrThrow({ where: { event: "PASSWORD_RESET" } });
+    expect(row.body).toBeNull();
+    expect(row.subject).not.toContain("SECRETO");
   });
 });
 

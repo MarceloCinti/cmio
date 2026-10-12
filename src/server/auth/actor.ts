@@ -1,7 +1,7 @@
 import "server-only";
 import { db } from "@/server/db";
 import type { Role } from "@/generated/prisma/client";
-import { PERMISSION_KEYS, type Permission } from "@/lib/permissions";
+import { PERMISSION_KEYS, ROLE_PERMISSION_CEILING, type ConfigurableRole, type Permission } from "@/lib/permissions";
 import { ForbiddenError } from "@/server/errors";
 
 /**
@@ -26,7 +26,8 @@ export async function permissionsForRole(role: Role): Promise<Set<Permission>> {
   if (role === "OWNER") return new Set(PERMISSION_KEYS);
   if (role === "PATIENT") return new Set();
   const rows = await db.rolePermission.findMany({ where: { role }, select: { permission: true } });
-  const valid = new Set<string>(PERMISSION_KEYS);
+  // Defensa en profundidad: nunca más permisos que el límite del rol, aunque la tabla los tenga.
+  const valid = new Set<string>(ROLE_PERMISSION_CEILING[role as ConfigurableRole] ?? []);
   return new Set(rows.map((r) => r.permission).filter((p): p is Permission => valid.has(p)));
 }
 
@@ -53,7 +54,8 @@ export async function buildActor(
     email: user.email,
     role: user.role,
     permissions: await permissionsForRole(user.role),
-    professionalId: user.professional && user.professional.status === "ACTIVE" ? user.professional.id : null,
+    // Solo las cuentas con rol de profesional obtienen acceso clínico por su perfil vinculado.
+    professionalId: user.role === "DOCTOR" && user.professional && user.professional.status === "ACTIVE" ? user.professional.id : null,
     patientId: user.role === "PATIENT" ? (user.patient?.id ?? null) : null,
     ip: meta.ip,
     userAgent: meta.userAgent,
@@ -77,7 +79,7 @@ export function assertStaff(actor: Actor) {
 }
 
 export function isClinician(actor: Actor) {
-  return actor.professionalId !== null && actor.role !== "PATIENT";
+  return actor.role === "DOCTOR" && actor.professionalId !== null;
 }
 
 export function assertClinician(actor: Actor) {

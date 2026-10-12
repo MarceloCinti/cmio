@@ -102,6 +102,42 @@ describe("Catálogo", () => {
   });
 });
 
+describe("Vinculación de cuentas a perfiles profesionales", () => {
+  beforeEach(resetDatabase);
+
+  const base = { firstName: "Perfil", lastName: "Prueba", status: "ACTIVE", sortOrder: "0" };
+
+  it("solo el propietario vincula cuentas, solo de rol profesional y nunca la propia", async () => {
+    const ownerUser = await createUser("OWNER");
+    const owner = await actorFor(ownerUser.id);
+    const adminUser = await createUser("ADMIN");
+    const admin = await actorFor(adminUser.id);
+    const doctorUser = await createUser("DOCTOR");
+    const id = await saveProfessional(admin, null, base);
+    // La administración no puede vincularse (ni vincular a otros) para obtener acceso clínico.
+    await expect(saveProfessional(admin, id, { ...base, userId: adminUser.id })).rejects.toBeInstanceOf(ForbiddenError);
+    await expect(saveProfessional(admin, id, { ...base, userId: doctorUser.id })).rejects.toBeInstanceOf(ForbiddenError);
+    // El propietario tampoco puede vincular su propia cuenta ni cuentas que no sean de profesionales.
+    await expect(saveProfessional(owner, id, { ...base, userId: ownerUser.id })).rejects.toBeInstanceOf(ForbiddenError);
+    await expect(saveProfessional(owner, id, { ...base, userId: adminUser.id })).rejects.toBeInstanceOf(ValidationError);
+    await saveProfessional(owner, id, { ...base, userId: doctorUser.id });
+    expect((await buildActor(doctorUser.id))?.professionalId).toBe(id);
+    // Editar el perfil sin el campo de cuenta conserva la vinculación.
+    await saveProfessional(admin, id, { ...base, lastName: "Editado" });
+    expect((await db.professional.findUniqueOrThrow({ where: { id } })).userId).toBe(doctorUser.id);
+    expect(await db.auditLog.count({ where: { action: "catalogo.profesional_editar", entityId: id } })).toBe(2);
+  });
+
+  it("una cuenta administrativa vinculada a un perfil no obtiene acceso clínico", async () => {
+    const adminUser = await createUser("ADMIN");
+    const admin = await actorFor(adminUser.id);
+    const id = await saveProfessional(admin, null, base);
+    await db.professional.update({ where: { id }, data: { userId: adminUser.id } });
+    const actor = await buildActor(adminUser.id);
+    expect(actor?.professionalId).toBeNull();
+  });
+});
+
 describe("Horarios y bloqueos", () => {
   beforeEach(resetDatabase);
 

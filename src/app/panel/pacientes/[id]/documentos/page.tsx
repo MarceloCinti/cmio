@@ -35,7 +35,10 @@ export default async function PatientDocumentsPage({ params, searchParams }: Pag
       />
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.5fr_1fr]">
         <Card>
-          <CardHeader title={`Documentos (${docs.length})`} />
+          <CardHeader
+            title={canReview ? `Documentos (${docs.length})` : `Documentos que subiste (${docs.length})`}
+            description={canReview ? undefined : "Por confidencialidad, solo ves los documentos que subiste tú."}
+          />
           {docs.length ? (
             <ul className="divide-y divide-line">
               {docs.map((d) => (

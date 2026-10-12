@@ -71,10 +71,19 @@ describe("Registro y verificación de pacientes", () => {
     });
   });
 
-  it("no vincula automáticamente una ficha existente con el mismo documento", async () => {
+  it("no vincula una ficha existente ni revela en pantalla si el documento o el correo ya existen", async () => {
     await createPatient({ documentNumber: "4567890" });
-    await expect(registerPatient(validRegistration, META)).rejects.toBeInstanceOf(ValidationError);
+    // Respuesta idéntica a un registro exitoso; el aviso llega solo al correo indicado.
+    const email = validRegistration.email.toLowerCase();
+    await expect(registerPatient(validRegistration, META)).resolves.toEqual({ email });
     expect(await db.user.count()).toBe(0);
+    const notice = await db.outboundMessage.findFirstOrThrow({ where: { recipient: email, event: "ADMIN_NOTICE" } });
+    expect(notice.body).toContain("secretaría");
+    // Correo ya registrado: misma respuesta, sin crear otra cuenta.
+    const existing = await createUser("PATIENT", { email: "existente@prueba.local" });
+    await expect(registerPatient({ ...validRegistration, email: existing.email, documentNumber: "7654321" }, META)).resolves.toEqual({ email: existing.email });
+    expect(await db.user.count()).toBe(1);
+    expect(await db.auditLog.count({ where: { action: "auth.registro_duplicado" } })).toBe(2);
   });
 });
 
@@ -110,6 +119,11 @@ describe("Ingreso, bloqueo y sesiones", () => {
     // Incluso con la contraseña correcta, sigue bloqueada
     await expect(login({ email: user.email, password: "Clave-de-prueba-123" }, META)).rejects.toBeInstanceOf(RateLimitError);
     expect(await db.auditLog.count({ where: { action: "auth.cuenta_bloqueada", actorId: user.id } })).toBe(1);
+    // Un correo sin cuenta se comporta igual (no revela qué cuentas existen).
+    for (let i = 0; i < 4; i++) {
+      await expect(login({ email: "nadie@prueba.local", password: "mala-clave-000" }, META)).rejects.toThrow("Correo o contraseña incorrectos.");
+    }
+    await expect(login({ email: "nadie@prueba.local", password: "mala-clave-000" }, META)).rejects.toBeInstanceOf(RateLimitError);
   });
 
   it("no permite ingresar a cuentas desactivadas e invalida sesiones de usuarios desactivados", async () => {

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { setRolePermissions } from "@/server/services/users";
 import { db } from "@/server/db";
 import {
   addAddendum,
@@ -16,7 +17,7 @@ import {
   verifyClinicalDocument,
   voidClinicalOrder,
 } from "@/server/services/clinical";
-import { getDocumentForDownload, listMyDocuments, publishDocument, uploadDocument } from "@/server/services/documents";
+import { getDocumentForDownload, listMyDocuments, listPatientDocuments, publishDocument, uploadDocument } from "@/server/services/documents";
 import { bookAppointment } from "@/server/services/appointments";
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from "@/server/errors";
 import { addDaysISO, localToUtc, todayISO } from "@/lib/time";
@@ -62,6 +63,24 @@ describe("Acceso a la historia clínica", () => {
     expect(record.patient.id).toBe(s.patient.id);
     expect(await db.auditLog.count({ where: { action: "clinica.ver_historia", patientId: s.patient.id, actorId: s.doctor.id } })).toBe(1);
     expect(await db.auditLog.count({ where: { action: "clinica.acceso_denegado", patientId: s.patient.id } })).toBeGreaterThanOrEqual(1);
+  });
+
+  it("las citas canceladas o agendadas por el propio profesional no generan relación de atención", async () => {
+    const s = await setup();
+    await setRolePermissions(s.owner, "DOCTOR", ["pacientes.ver", "citas.gestionar"]);
+    const otherDoctor = await actorFor(s.otherDoctor.id);
+    // El otro profesional se agenda una cita con el paciente: no obtiene acceso por eso.
+    const self = await bookAppointment(otherDoctor, {
+      patientId: s.patient.id,
+      professionalId: otherDoctor.professionalId!,
+      serviceId: (await db.professionalService.findFirstOrThrow({ where: { professionalId: otherDoctor.professionalId! } })).serviceId,
+      startsAt: localToUtc(addDaysISO(todayISO(), 3), 600).toISOString(),
+    });
+    expect(self.status).toBe("SCHEDULED");
+    await expect(getClinicalRecord(otherDoctor, s.patient.id)).rejects.toBeInstanceOf(ForbiddenError);
+    // Una cita cancelada tampoco mantiene la relación.
+    await db.appointment.update({ where: { id: s.appt.id }, data: { status: "CANCELLED", cancelledAt: new Date() } });
+    await expect(getClinicalRecord(s.doctor, s.patient.id)).rejects.toBeInstanceOf(ForbiddenError);
   });
 
   it("los antecedentes se versionan sin sobrescribir la versión anterior", async () => {
@@ -177,6 +196,12 @@ describe("Documentos clínicos", () => {
     // El aviso al paciente no revela el contenido
     const notice = await db.notification.findFirstOrThrow({ where: { userId: s.patientActor.id, title: "Nuevo documento disponible" } });
     expect(notice.body).not.toContain("laboratorio");
+
+    // La secretaría solo ve en el listado los documentos que ella subió (los títulos pueden
+    // revelar información clínica); el profesional tratante ve todos.
+    await uploadDocument(s.doctor, s.patient.id, pdfForm({ title: "Informe de biopsia", category: "OTHER" }));
+    expect((await listPatientDocuments(s.secretary, s.patient.id)).docs.map((d) => d.title)).toEqual(["Resultado de laboratorio"]);
+    expect((await listPatientDocuments(s.doctor, s.patient.id)).docs).toHaveLength(2);
   });
 
   it("rechaza archivos cuyo contenido no corresponde a un formato permitido", async () => {
@@ -193,12 +218,20 @@ describe("Documentos clínicos", () => {
 describe("Exportación de historias clínicas", () => {
   beforeEach(resetDatabase);
 
-  it("requiere autorización específica y motivo, y queda registrada", async () => {
+  it("requiere autorización específica, relación de atención y motivo, y queda registrada", async () => {
     const s = await setup();
     const admin = await actorFor((await createUser("ADMIN")).id);
     await expect(exportClinicalRecord(admin, s.patient.id, { reason: "Prueba" })).rejects.toBeInstanceOf(ForbiddenError);
-    await expect(exportClinicalRecord(s.owner, s.patient.id, { reason: "" })).rejects.toBeInstanceOf(ValidationError);
-    const data = await exportClinicalRecord(s.owner, s.patient.id, { reason: "Solicitud escrita del paciente" });
+    // El propietario no es profesional tratante: no accede al contenido clínico.
+    await expect(exportClinicalRecord(s.owner, s.patient.id, { reason: "Solicitud escrita del paciente" })).rejects.toBeInstanceOf(ForbiddenError);
+    // El profesional tratante necesita además el permiso específico.
+    await expect(exportClinicalRecord(s.doctor, s.patient.id, { reason: "Solicitud escrita del paciente" })).rejects.toBeInstanceOf(ForbiddenError);
+    await setRolePermissions(s.owner, "DOCTOR", ["pacientes.ver", "clinica.exportar"]);
+    const doctor = await actorFor(s.doctor.id);
+    const otherDoctor = await actorFor(s.otherDoctor.id);
+    await expect(exportClinicalRecord(otherDoctor, s.patient.id, { reason: "Solicitud escrita del paciente" })).rejects.toBeInstanceOf(ForbiddenError);
+    await expect(exportClinicalRecord(doctor, s.patient.id, { reason: "" })).rejects.toBeInstanceOf(ValidationError);
+    const data = await exportClinicalRecord(doctor, s.patient.id, { reason: "Solicitud escrita del paciente" });
     expect(data.id).toBe(s.patient.id);
     const log = await db.auditLog.findFirstOrThrow({ where: { action: "clinica.exportar", patientId: s.patient.id } });
     expect(log.details).toMatchObject({ motivo: "Solicitud escrita del paciente" });

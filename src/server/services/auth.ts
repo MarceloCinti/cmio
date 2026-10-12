@@ -19,7 +19,7 @@ import {
 } from "@/lib/validation/auth";
 import { isoToDbDate } from "@/lib/time";
 import { emailStatus } from "@/server/integrations/email";
-import { sendSecurityEmail } from "./messaging";
+import { kickMessageQueue, queueMessage, sendSecurityEmail } from "./messaging";
 import { getSiteContent } from "./settings";
 
 export type Meta = { ip: string; userAgent: string | null };
@@ -93,23 +93,38 @@ export async function registerPatient(input: unknown, meta: Meta) {
   }
 
   const existingUser = await db.user.findUnique({ where: { email: data.email }, select: { id: true } });
-  if (existingUser) {
-    throw new ValidationError("Ya existe una cuenta con ese correo.", {
-      email: ["Ya existe una cuenta con ese correo. Ingresa o recupera tu contraseña."],
+  const existingPatient = existingUser
+    ? null
+    : await db.patient.findUnique({
+        where: { documentType_documentNumber: { documentType: data.documentType, documentNumber: data.documentNumber } },
+        select: { id: true },
+      });
+  if (existingUser || existingPatient) {
+    // Ser paciente de la clínica es información de salud: la pantalla responde igual que un
+    // registro exitoso y el detalle llega solo al correo indicado. Una ficha existente nunca
+    // se vincula automáticamente (alguien podría conocer el número de documento de otra persona).
+    await hashPassword(data.password); // tiempo de respuesta similar al de un registro real
+    await queueMessage({
+      channel: "EMAIL",
+      event: "ADMIN_NOTICE",
+      recipient: data.email,
+      vars: {
+        nombre: data.firstName,
+        mensaje: existingUser
+          ? "Recibimos una solicitud de registro con este correo, pero ya existe una cuenta asociada. Si no recuerdas tu contraseña, usa la opción «¿Olvidaste tu contraseña?» en la página de ingreso. Si no fuiste tú, ignora este mensaje."
+          : "Recibimos una solicitud de registro, pero ya existe una ficha de paciente con el documento indicado. Por seguridad no vinculamos fichas automáticamente: comunícate con la secretaría para que te envíe la invitación al portal. Si no fuiste tú, ignora este mensaje.",
+      },
+      dedupeKey: `registro-existente:${data.email}:${new Date().toISOString().slice(0, 10)}`,
     });
-  }
-  const existingPatient = await db.patient.findUnique({
-    where: { documentType_documentNumber: { documentType: data.documentType, documentNumber: data.documentNumber } },
-    select: { id: true },
-  });
-  if (existingPatient) {
-    // No se vincula automáticamente una ficha existente: podría permitir que alguien
-    // acceda a documentos de otra persona conociendo su número de documento.
-    throw new ValidationError("Ya existe una ficha con ese documento.", {
-      documentNumber: [
-        "Ya tienes una ficha en la clínica. Comunícate con la secretaría para que te envíe la invitación al portal.",
-      ],
+    kickMessageQueue();
+    await auditAnonymous({
+      action: "auth.registro_duplicado",
+      success: false,
+      ip: meta.ip,
+      userAgent: meta.userAgent,
+      details: { motivo: existingUser ? "correo_existente" : "documento_existente" },
     });
+    return { email: data.email };
   }
 
   const { legal } = await getSiteContent("published");
@@ -228,7 +243,11 @@ export async function login(input: unknown, meta: Meta): Promise<LoginResult> {
   const user = await db.user.findUnique({ where: { email } });
   if (!user || !user.passwordHash) {
     await burnPasswordCheck(password);
-    await auditAnonymous({ action: "auth.ingreso_fallido", success: false, ip: meta.ip, userAgent: meta.userAgent, details: { email } });
+    await auditAnonymous({ action: "auth.ingreso_fallido", success: false, ip: meta.ip, userAgent: meta.userAgent, details: { email: email.slice(0, 120) } });
+    // Mismo comportamiento que una cuenta real (bloqueo al quinto intento) para no revelar
+    // qué correos tienen cuenta.
+    const unknown = await consumeRateLimit(`ingreso-inexistente:${email}`, MAX_FAILED_ATTEMPTS - 1, LOCK_MINUTES * 60);
+    if (!unknown.allowed) throw new RateLimitError(TOO_MANY);
     throw new AppError(INVALID_CREDENTIALS, "INVALID_CREDENTIALS");
   }
 

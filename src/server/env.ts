@@ -12,6 +12,7 @@ const schema = z.object({
   APP_URL: z.string().url().default("http://localhost:3000"),
   CRON_SECRET: z.string().min(32, "CRON_SECRET debe tener al menos 32 caracteres").optional(),
   TRUST_PROXY: boolish,
+  TRUST_PROXY_HOPS: z.coerce.number().int().min(1).max(5).default(1),
   DEMO_MODE: boolish,
 
   EMAIL_DRIVER: z.enum(["smtp", "file", "disabled"]).default("disabled"),
@@ -47,6 +48,9 @@ function load(): Env {
   if (env.NODE_ENV === "production") {
     if (env.EMAIL_DRIVER === "file") {
       throw new Error("EMAIL_DRIVER=file solo puede usarse en desarrollo o pruebas.");
+    }
+    if (!env.TRUST_PROXY) {
+      console.warn("[cmio] TRUST_PROXY no está activo: los límites por IP se aplican de forma global. En producción ejecuta la aplicación detrás de un proxy inverso y define TRUST_PROXY=true.");
     }
     if (!env.APP_URL.startsWith("https://")) {
       console.warn("[cmio] APP_URL no usa HTTPS. En producción el sitio debe servirse por HTTPS.");

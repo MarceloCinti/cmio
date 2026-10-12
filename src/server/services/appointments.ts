@@ -535,7 +535,11 @@ export async function listPatientAppointments(actor: Actor, patientId: string) {
 
 export async function getAppointmentEvents(actor: Actor, appointmentId: string) {
   await getAppointmentForActor(actor, appointmentId, "view");
-  return db.appointmentEvent.findMany({ where: { appointmentId }, orderBy: { createdAt: "asc" } });
+  const events = await db.appointmentEvent.findMany({ where: { appointmentId }, orderBy: { createdAt: "asc" } });
+  if (actor.role !== "PATIENT") return events;
+  // El paciente ve el historial de su cita, pero no las notas internas del personal
+  // (motivos de sobreturno, correcciones). Solo se le muestra el motivo de una cancelación.
+  return events.map((e) => ({ ...e, reason: e.toStatus === "CANCELLED" ? e.reason : null }));
 }
 
 export function nextActiveAppointmentWhere(patientId: string): Prisma.AppointmentWhereInput {

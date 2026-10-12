@@ -3,7 +3,7 @@ import { db } from "@/server/db";
 import { parseInput } from "@/server/action";
 import { assertCan, type Actor } from "@/server/auth/actor";
 import { audit } from "@/server/audit";
-import { NotFoundError, ValidationError } from "@/server/errors";
+import { ForbiddenError, NotFoundError, ValidationError } from "@/server/errors";
 import { z } from "@/lib/validation/zod-es";
 import { SECURITY_EVENTS, type MessageEventKey } from "@/lib/message-templates";
 import type { MessageStatus } from "@/generated/prisma/client";
@@ -62,8 +62,8 @@ export async function updateTemplate(actor: Actor, id: string, input: unknown) {
   }
   const t = await db.messageTemplate.findUnique({ where: { id } });
   if (!t) throw new NotFoundError("No encontramos la plantilla.");
-  if (!data.body.includes("{{enlace}}") && ["ACCOUNT_VERIFICATION", "PASSWORD_RESET", "STAFF_INVITATION"].includes(t.event)) {
-    throw new ValidationError("Esta plantilla debe incluir {{enlace}}.", { body: ["Incluye la variable {{enlace}}."] });
+  if (SECURITY_EVENTS.includes(t.event as MessageEventKey)) {
+    throw new ForbiddenError("Las plantillas de seguridad (verificación, recuperación e invitación) son fijas y no se pueden editar.");
   }
   await db.messageTemplate.update({
     where: { id },

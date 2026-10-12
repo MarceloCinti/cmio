@@ -8,11 +8,11 @@ import { ConflictError, ForbiddenError, NotFoundError, ValidationError, isUnique
 import type { ConsentType, Prisma } from "@/generated/prisma/client";
 import { consentPrefsSchema, patientAdminSchema, patientSelfSchema } from "@/lib/validation/patients";
 import { isoToDbDate } from "@/lib/time";
-import { emailStatus } from "@/server/integrations/email";
 import { issueToken } from "./auth";
 import { sendSecurityEmail } from "./messaging";
 import { getSiteContent } from "./settings";
 import { latestConsents } from "./appointment-notifications";
+import { maskContact } from "@/lib/format";
 
 const PAGE_SIZE = 20;
 
@@ -195,9 +195,15 @@ export async function invitePatientToPortal(actor: Actor, patientId: string): Pr
   const token = await issueToken(user.id, "INVITATION", actor.id);
   const link = `${env().APP_URL}/invitacion?token=${encodeURIComponent(token)}`;
   const result = await sendSecurityEmail({ event: "STAFF_INVITATION", to: user.email, name: patient.firstName, link, userId: user.id });
-  await audit(actor, { action: "pacientes.invitar_portal", entityType: "Patient", entityId: patientId, patientId, details: { enviado: result.sent } });
-  // Si no hay correo configurado, el enlace se muestra una sola vez a quien invitó.
-  return result.sent && emailStatus().driver !== "file" ? { sent: true } : { sent: result.sent, link };
+  await audit(actor, {
+    action: "pacientes.invitar_portal",
+    entityType: "Patient",
+    entityId: patientId,
+    patientId,
+    details: { enviado: result.sent, destinatario: maskContact(user.email) },
+  });
+  // El enlace de activación nunca se muestra al personal: solo llega al correo del paciente.
+  return { sent: result.sent };
 }
 
 export async function recordConsent(actor: Actor, patientId: string, type: ConsentType, granted: boolean) {

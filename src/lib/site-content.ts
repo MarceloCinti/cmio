@@ -43,8 +43,8 @@ export const institutionSchema = z.object({
   mapQuery: text(200),
   latitude: z.number().min(-90).max(90).nullable(),
   longitude: z.number().min(-180).max(180).nullable(),
-  facebookUrl: z.union([z.literal(""), z.string().url("Enlace inválido")]),
-  instagramUrl: z.union([z.literal(""), z.string().url("Enlace inválido")]),
+  facebookUrl: z.union([z.literal(""), z.string().trim().max(300).regex(/^https:\/\/[^\s]+$/, "Usa un enlace que empiece con https://")]),
+  instagramUrl: z.union([z.literal(""), z.string().trim().max(300).regex(/^https:\/\/[^\s]+$/, "Usa un enlace que empiece con https://")]),
   // El propietario confirma que teléfonos, dirección, horarios y WhatsApp fueron verificados.
   contactVerified: z.boolean(),
 });
@@ -101,7 +101,7 @@ export const announcementSchema = z.object({
   enabled: z.boolean(),
   text: text(200),
   linkLabel: text(40),
-  linkHref: z.union([z.literal(""), z.string().regex(/^(\/|https:\/\/)/, "Usa un enlace interno (/…) o https://")]),
+  linkHref: z.union([z.literal(""), z.string().regex(/^(\/(?![\/\\])|https:\/\/)\S*$/, "Usa un enlace interno (/…) o https://")]),
 });
 
 export const SITE_CONTENT_SCHEMAS = {

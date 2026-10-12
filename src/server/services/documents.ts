@@ -58,11 +58,18 @@ export async function uploadDocument(actor: Actor, patientId: string, formData: 
   return doc;
 }
 
-/** Listado: profesionales con relación ven todo; quien solo sube documentos ve títulos y estados. */
+/**
+ * Listado: los profesionales con relación de atención ven todos los documentos. Quien solo
+ * tiene permiso para subir documentos (p. ej., secretaría) ve únicamente los que subió, porque
+ * el título o la categoría de otros documentos ya puede revelar información clínica.
+ */
 export async function listPatientDocuments(actor: Actor, patientId: string) {
   const clinician = isClinician(actor) && (await hasClinicalAccess(actor, patientId));
   if (!clinician && !can(actor, "documentos.subir")) throw new ForbiddenError();
-  const docs = await db.clinicalDocument.findMany({ where: { patientId }, orderBy: { createdAt: "desc" } });
+  const docs = await db.clinicalDocument.findMany({
+    where: { patientId, ...(clinician ? {} : { uploadedById: actor.id }) },
+    orderBy: { createdAt: "desc" },
+  });
   return { docs, canReview: clinician, canDownload: clinician };
 }
 

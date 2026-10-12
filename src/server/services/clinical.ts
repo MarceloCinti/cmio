@@ -32,11 +32,21 @@ import { changeAppointmentStatus } from "./appointments";
  */
 export async function hasClinicalAccess(actor: Actor, patientId: string) {
   if (!isClinician(actor)) return false;
-  const [appts, encounters] = await Promise.all([
-    db.appointment.count({ where: { patientId, professionalId: actor.professionalId! } }),
-    db.encounter.count({ where: { patientId, professionalId: actor.professionalId! } }),
+  const professionalId = actor.professionalId!;
+  const [encounters, appts] = await Promise.all([
+    db.encounter.count({ where: { patientId, professionalId } }),
+    db.appointment.count({
+      where: {
+        patientId,
+        professionalId,
+        // Las citas canceladas no generan relación de atención. Una cita que el propio
+        // profesional agendó solo cuenta cuando el paciente llegó o fue atendido.
+        status: { not: "CANCELLED" },
+        OR: [{ createdById: null }, { createdById: { not: actor.id } }, { status: { in: ["CHECKED_IN", "IN_PROGRESS", "COMPLETED"] } }],
+      },
+    }),
   ]);
-  return appts + encounters > 0;
+  return encounters + appts > 0;
 }
 
 export async function assertClinicalAccess(actor: Actor, patientId: string) {
@@ -434,7 +444,10 @@ export async function getMyProgress(actor: Actor) {
 // ─────────────────────────────────────────────────────────────
 
 export async function exportClinicalRecord(actor: Actor, patientId: string, input: unknown) {
+  // Requiere el permiso específico y, además, ser un profesional con relación de atención:
+  // ningún rol administrativo accede al contenido clínico, ni siquiera para exportarlo.
   assertCan(actor, "clinica.exportar", "No tienes autorización para exportar historias clínicas.");
+  await assertClinicalAccess(actor, patientId);
   const { reason } = parseInput(exportSchema, input);
   const data = await db.patient.findUnique({
     where: { id: patientId },

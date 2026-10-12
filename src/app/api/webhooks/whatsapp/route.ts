@@ -2,6 +2,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { db } from "@/server/db";
 import { env } from "@/server/env";
+import { safeEqual } from "@/server/auth/crypto";
 
 // Webhook oficial de WhatsApp Cloud API para estados de entrega.
 // Verificación: GET con hub.verify_token. Notificaciones: POST firmadas con X-Hub-Signature-256.
@@ -12,7 +13,7 @@ export async function GET(request: Request) {
   if (
     expected &&
     url.searchParams.get("hub.mode") === "subscribe" &&
-    url.searchParams.get("hub.verify_token") === expected
+    safeEqual(url.searchParams.get("hub.verify_token") ?? "", expected)
   ) {
     return new NextResponse(url.searchParams.get("hub.challenge") ?? "", { status: 200 });
   }

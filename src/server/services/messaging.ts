@@ -15,6 +15,7 @@ import { IntegrationNotConfiguredError, emailStatus, sendEmail } from "@/server/
 import { WhatsAppApiError, sendWhatsAppTemplate, whatsappStatus } from "@/server/integrations/whatsapp";
 import { getSiteContent, getSystemSetting } from "./settings";
 import { professionalDisplayName } from "./public-site";
+import { safeErrorSummary } from "@/server/errors";
 
 const MAX_ATTEMPTS = 5;
 
@@ -51,9 +52,12 @@ export async function sendSecurityEmail(input: {
   link: string;
   userId?: string;
 }): Promise<{ sent: boolean; reason?: string }> {
-  const template = await loadTemplate(input.event, "EMAIL");
-  const vars = { ...(await baseVars()), nombre: input.name, enlace: input.link };
-  const subject = renderTemplate(template?.subject ?? "Mensaje de la clínica", vars);
+  // Plantilla fija (no editable desde el panel) para que nadie pueda redirigir el enlace de
+  // un solo uso ni copiarlo en el asunto, que sí se guarda en el registro de envíos.
+  const template = DEFAULT_EMAIL_TEMPLATES[input.event];
+  const base = { ...(await baseVars()), nombre: input.name };
+  const vars = { ...base, enlace: input.link };
+  const subject = renderTemplate(template.subject ?? "Mensaje de la clínica", base);
   const status = emailStatus();
   const record = await db.outboundMessage.create({
     data: {
@@ -74,7 +78,7 @@ export async function sendSecurityEmail(input: {
     return { sent: false, reason: status.detail };
   }
   try {
-    const result = await sendEmail({ to: input.to, subject, text: renderTemplate(template?.body ?? "{{enlace}}", vars) });
+    const result = await sendEmail({ to: input.to, subject, text: renderTemplate(template.body, vars) });
     await db.outboundMessage.update({
       where: { id: record.id },
       data: { status: "SENT", sentAt: new Date(), attempts: 1, providerMessageId: result.providerMessageId ?? null },
@@ -259,7 +263,7 @@ export async function processMessageQueue(limit = 20) {
 /** Procesa la cola sin bloquear ni propagar errores (uso oportunista). */
 export function kickMessageQueue() {
   if (process.env.NODE_ENV === "test") return;
-  processMessageQueue(10).catch((e) => console.error("[cmio] Error procesando la cola de mensajes:", (e as Error).message));
+  processMessageQueue(10).catch((e) => console.error("[cmio] Error procesando la cola de mensajes:", safeErrorSummary(e)));
 }
 
 export async function retryMessage(id: string) {

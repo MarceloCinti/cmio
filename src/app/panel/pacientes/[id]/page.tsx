@@ -61,7 +61,7 @@ export default async function PatientPage({ params, searchParams }: PageProps<"/
                 Historia clínica
               </ButtonLink>
             ) : null}
-            {can(actor, "clinica.exportar") ? (
+            {clinical && can(actor, "clinica.exportar") ? (
               <ButtonLink href={`/panel/pacientes/${patient.id}/exportar`} variant="ghost">
                 Exportar historia
               </ButtonLink>

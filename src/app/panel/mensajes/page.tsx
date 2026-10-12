@@ -10,19 +10,12 @@ import { requirePermission } from "@/server/auth/current";
 import { listOutboundMessages, listTemplates } from "@/server/services/messages-admin";
 import { MESSAGE_EVENT_LABELS, SECURITY_EVENTS, TEMPLATE_VARIABLES, type MessageEventKey } from "@/lib/message-templates";
 import { DELIVERY_STATUS_LABELS, MESSAGE_SKIP_REASONS, MESSAGE_STATUS_LABELS } from "@/lib/labels";
-import { formatDateTime } from "@/lib/format";
+import { formatDateTime, maskContact } from "@/lib/format";
 import type { MessageStatus } from "@/generated/prisma/client";
 import { retryMessageAction } from "../admin-actions";
 
 export const metadata = { title: "Mensajes y plantillas" };
 
-function maskRecipient(r: string) {
-  if (r.includes("@")) {
-    const [u, d] = r.split("@");
-    return `${u.slice(0, 2)}***@${d}`;
-  }
-  return r.length > 4 ? `${"*".repeat(Math.max(0, r.length - 4))}${r.slice(-4)}` : r;
-}
 
 export default async function MessagesPage({ searchParams }: PageProps<"/panel/mensajes">) {
   const actor = await requirePermission("mensajes.gestionar");
@@ -64,7 +57,7 @@ async function Log({ status, page, actorP }: { status?: MessageStatus; page: num
               <li key={m.id} className="flex flex-wrap items-start justify-between gap-3 px-5 py-3 text-sm">
                 <div className="min-w-0">
                   <p className="font-medium text-ink">
-                    {MESSAGE_EVENT_LABELS[m.event as MessageEventKey]} · {m.channel === "EMAIL" ? "Correo" : "WhatsApp"} · {maskRecipient(m.recipient)}
+                    {MESSAGE_EVENT_LABELS[m.event as MessageEventKey]} · {m.channel === "EMAIL" ? "Correo" : "WhatsApp"} · {maskContact(m.recipient)}
                   </p>
                   <p className="text-xs text-muted">
                     {formatDateTime(m.createdAt)} · intentos: {m.attempts}
@@ -112,7 +105,13 @@ async function Templates({ actorP }: { actorP: Awaited<ReturnType<typeof require
                   </span>
                 </summary>
                 <div className="mt-4">
-                  <TemplateForm t={t} />
+                  {SECURITY_EVENTS.includes(t.event as MessageEventKey) ? (
+                    <p className="rounded-xl bg-primary-soft/50 p-3 text-sm text-muted">
+                      Plantilla de seguridad fija: contiene un enlace de un solo uso y no se puede editar para proteger las cuentas.
+                    </p>
+                  ) : (
+                    <TemplateForm t={t} />
+                  )}
                 </div>
               </details>
             </li>

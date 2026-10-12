@@ -72,6 +72,9 @@ export async function inviteStaffUser(actor: Actor, input: unknown): Promise<{ s
   }
   let professionalId: string | null = null;
   if (data.professionalId) {
+    // Vincular un perfil da acceso clínico: solo el propietario y solo para cuentas de profesional.
+    if (actor.role !== "OWNER") throw new ForbiddenError("Solo el propietario puede vincular una cuenta a un perfil profesional.");
+    if (data.role !== "DOCTOR") throw new ValidationError("Solo las cuentas con rol de profesional pueden vincularse a un perfil profesional.");
     const p = await db.professional.findUnique({ where: { id: data.professionalId } });
     if (!p) throw new ValidationError("El perfil profesional no existe.");
     if (p.userId) throw new ConflictError("Ese perfil profesional ya tiene una cuenta vinculada.");
@@ -91,7 +94,9 @@ async function sendInvitation(actor: Actor, userId: string) {
   const token = await issueToken(user.id, "INVITATION", actor.id);
   const link = `${env().APP_URL}/invitacion?token=${encodeURIComponent(token)}`;
   const res = await sendSecurityEmail({ event: "STAFF_INVITATION", to: user.email, name: user.name.split(" ")[0], link, userId: user.id });
-  // Sin correo real configurado, el enlace se muestra una única vez a quien invita.
+  // Sin correo real configurado, el enlace de una cuenta del personal se muestra una única vez a
+  // quien invita. Nunca se muestra el de una cuenta de paciente.
+  if (user.role === "PATIENT") return { sent: res.sent };
   return res.sent && emailStatus().driver === "smtp" ? { sent: true } : { sent: res.sent, link };
 }
 

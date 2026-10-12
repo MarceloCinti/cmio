@@ -39,6 +39,8 @@ export default async function ProfessionalAdminPage({ params, searchParams }: Pa
             specialtyIds: p.specialties.map((s) => s.specialtyId),
             serviceIds: p.services.map((s) => s.serviceId),
           }}
+          canLinkAccount={actor.role === "OWNER"}
+          linkedAccountLabel={p.user ? `${p.user.name} (${p.user.email})` : null}
           specialties={opts.specialties}
           services={opts.services}
           users={opts.users}

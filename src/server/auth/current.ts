@@ -7,6 +7,7 @@ import { buildActor, can, type Actor } from "./actor";
 import { readSessionCookie } from "./cookies";
 import { getRequestMeta } from "./request-meta";
 import { validateSessionToken } from "./session";
+import { safeNextPath } from "@/lib/safe-path";
 
 export type CurrentActor = Actor & { sessionId: string };
 
@@ -27,10 +28,7 @@ export async function currentPath(): Promise<string> {
   return safeNextPath(path) ?? "/";
 }
 
-export function safeNextPath(value: string | null | undefined): string | null {
-  if (!value || !value.startsWith("/") || value.startsWith("//") || value.startsWith("/\\")) return null;
-  return value.slice(0, 300);
-}
+export { safeNextPath };
 
 export async function requireActor(): Promise<CurrentActor> {
   const actor = await getCurrentActor();

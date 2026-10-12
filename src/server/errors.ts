@@ -89,3 +89,16 @@ export function isUniqueViolation(error: unknown) {
   const code = (error as { code?: string })?.code;
   return code === "P2002" || pgErrorCode(error) === "23505";
 }
+
+/**
+ * Resumen de un error apto para registros del servidor. Los errores de Prisma pueden incluir
+ * valores de la consulta (datos personales o clínicos), por lo que solo se registra su tipo y código.
+ */
+export function safeErrorSummary(error: unknown): string {
+  const err = error as { name?: unknown; code?: unknown; message?: unknown } | null;
+  const name = typeof err?.name === "string" ? err.name : "Error";
+  const code = typeof err?.code === "string" ? ` ${err.code}` : "";
+  if (name.startsWith("PrismaClient")) return `${name}${code} (detalle omitido)`;
+  const message = typeof err?.message === "string" ? `: ${err.message.slice(0, 300)}` : "";
+  return `${name}${code}${message}`;
+}

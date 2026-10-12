@@ -130,8 +130,12 @@ export function ProfessionalForm({
   specialties,
   services,
   users,
+  canLinkAccount,
+  linkedAccountLabel,
 }: {
   p?: Professional;
+  canLinkAccount: boolean;
+  linkedAccountLabel: string | null;
   specialties: { id: string; name: string }[];
   services: { id: string; name: string; confirmed: boolean }[];
   users: { id: string; label: string }[];
@@ -192,7 +196,22 @@ export function ProfessionalForm({
               { value: "INACTIVE", label: "Inactivo" },
             ]}
           />
-          <SelectField name="userId" label="Cuenta de acceso" defaultValue={p?.userId ?? ""} placeholder="Sin cuenta vinculada" options={users.map((u) => ({ value: u.id, label: u.label }))} hint="Habilita su panel y la historia clínica." />
+          {canLinkAccount ? (
+            <SelectField
+              name="userId"
+              label="Cuenta de acceso"
+              defaultValue={p?.userId ?? ""}
+              placeholder="Sin cuenta vinculada"
+              options={users.map((u) => ({ value: u.id, label: u.label }))}
+              hint="Solo cuentas con rol de profesional. Habilita su agenda y la historia clínica de sus pacientes."
+            />
+          ) : (
+            <div className="space-y-1.5 text-sm">
+              <p className="font-medium text-ink">Cuenta de acceso</p>
+              <p className="text-muted">{linkedAccountLabel ?? "Sin cuenta vinculada"}</p>
+              <p className="text-xs text-muted">Solo el propietario puede vincular o cambiar la cuenta, porque da acceso a la historia clínica.</p>
+            </div>
+          )}
           <TextField name="sortOrder" label="Orden en el sitio" inputMode="numeric" defaultValue={String(p?.sortOrder ?? 0)} />
         </div>
         <CheckboxField name="acceptsOnlineBooking" defaultChecked={p?.acceptsOnlineBooking ?? true} label="Recibe reservas en línea desde el portal" />

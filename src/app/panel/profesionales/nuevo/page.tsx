@@ -6,7 +6,7 @@ import { professionalFormOptions } from "@/server/services/professional-form-dat
 export const metadata = { title: "Nuevo perfil profesional" };
 
 export default async function NewProfessionalPage() {
-  await requirePermission("catalogo.gestionar");
+  const actor = await requirePermission("catalogo.gestionar");
   const opts = await professionalFormOptions(null);
   return (
     <div className="max-w-4xl">
@@ -15,7 +15,7 @@ export default async function NewProfessionalPage() {
         title="Nuevo perfil profesional"
         description="Carga solo datos verificados. El perfil no se publica hasta que lo apruebes."
       />
-      <ProfessionalForm specialties={opts.specialties} services={opts.services} users={opts.users} />
+      <ProfessionalForm canLinkAccount={actor.role === "OWNER"} linkedAccountLabel={null} specialties={opts.specialties} services={opts.services} users={opts.users} />
     </div>
   );
 }

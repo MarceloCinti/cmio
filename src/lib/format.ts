@@ -100,3 +100,12 @@ export const WEEKDAY_LABELS: Record<number, string> = {
   6: "Sábado",
   7: "Domingo",
 };
+
+/** Oculta parcialmente un correo o teléfono para registros y listados. */
+export function maskContact(value: string) {
+  if (value.includes("@")) {
+    const [user, domain] = value.split("@");
+    return `${user.slice(0, 2)}***@${domain}`;
+  }
+  return value.length > 4 ? `${"*".repeat(Math.max(0, value.length - 4))}${value.slice(-4)}` : value;
+}

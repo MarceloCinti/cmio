@@ -4,7 +4,7 @@ import type { ZodType } from "zod";
 import { z } from "@/lib/validation/zod-es";
 import type { ActionState } from "@/lib/action-state";
 import { formDataToObject } from "@/lib/form-data";
-import { AppError, ValidationError } from "./errors";
+import { AppError, ValidationError, safeErrorSummary } from "./errors";
 
 /** Valida datos con un esquema y lanza ValidationError con mensajes por campo. */
 export function parseInput<S extends ZodType>(schema: S, input: unknown): z.output<S> {
@@ -35,8 +35,7 @@ export async function runAction<T>(fn: () => Promise<T | void>, successMessage?:
     if (error instanceof AppError) {
       return { ok: false, message: error.message, fieldErrors: error.fieldErrors, at: Date.now() };
     }
-    const err = error as Error;
-    console.error("[cmio] Error inesperado en acción:", err?.name, err?.message?.slice(0, 300));
+    console.error("[cmio] Error inesperado en acción:", safeErrorSummary(error));
     return {
       ok: false,
       message: "Ocurrió un error inesperado. Intenta nuevamente en unos minutos; si el problema continúa, comunícate con la clínica.",

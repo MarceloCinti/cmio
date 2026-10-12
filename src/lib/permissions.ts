@@ -1,5 +1,5 @@
 // Catálogo de permisos y roles. Este archivo no contiene lógica de autorización:
-// las comprobaciones se hacen siempre en el servidor (src/server/auth/authorize.ts).
+// las comprobaciones se hacen siempre en el servidor (src/server/auth/actor.ts).
 
 export const ROLES = ["OWNER", "ADMIN", "SECRETARY", "DOCTOR", "PATIENT"] as const;
 export type RoleKey = (typeof ROLES)[number];
@@ -81,7 +81,8 @@ export type ConfigurableRole = (typeof CONFIGURABLE_ROLES)[number];
 // puede otorgar permisos fuera de esta lista (p. ej., la secretaría nunca exporta
 // historias clínicas).
 export const ROLE_PERMISSION_CEILING: Record<ConfigurableRole, Permission[]> = {
-  ADMIN: PERMISSION_KEYS,
+  // La administración nunca exporta historias clínicas (no tiene acceso al contenido clínico).
+  ADMIN: PERMISSION_KEYS.filter((p) => p !== "clinica.exportar"),
   SECRETARY: [
     "agenda.ver_todas",
     "citas.gestionar",
@@ -102,6 +103,8 @@ export const ROLE_PERMISSION_CEILING: Record<ConfigurableRole, Permission[]> = {
     "pacientes.ver",
     "documentos.subir",
     "informes.ver",
+    // Solo efectivo para pacientes con los que el profesional tiene relación de atención.
+    "clinica.exportar",
   ],
 };
 

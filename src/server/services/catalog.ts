@@ -3,7 +3,7 @@ import { db } from "@/server/db";
 import { parseInput } from "@/server/action";
 import { assertCan, type Actor } from "@/server/auth/actor";
 import { audit } from "@/server/audit";
-import { ConflictError, NotFoundError, ValidationError, isUniqueViolation } from "@/server/errors";
+import { ConflictError, ForbiddenError, NotFoundError, ValidationError, isUniqueViolation } from "@/server/errors";
 import { faqSchema, professionalSchema, serviceSchema, slugify, specialtySchema } from "@/lib/validation/catalog";
 import { storeFile, validateUpload } from "@/server/integrations/storage";
 import type { Prisma } from "@/generated/prisma/client";
@@ -142,13 +142,26 @@ export async function saveProfessional(actor: Actor, id: string | null, input: u
     if (!d.bio || d.bio.length < 30) problems.push("debe tener una descripción profesional de al menos 30 caracteres");
     if (problems.length) throw new ValidationError(`Para publicar el perfil: ${problems.join(", ")}.`, { isPublished: ["Completa el perfil antes de publicarlo."] });
   }
-  const userId: string | null = d.userId ?? null;
-  if (userId) {
-    const u = await db.user.findUnique({ where: { id: userId }, include: { professional: true } });
-    if (!u || u.role === "PATIENT") throw new ValidationError("La cuenta seleccionada no es válida para un profesional.");
-    if (u.professional && u.professional.id !== id) throw new ConflictError("Esa cuenta ya está vinculada a otro perfil profesional.");
-  }
   const existing = id ? await db.professional.findUnique({ where: { id } }) : null;
+  if (id && !existing) throw new NotFoundError("No encontramos al profesional.");
+  // Vincular una cuenta da acceso a la historia clínica: solo el propietario puede hacerlo,
+  // solo con cuentas de rol profesional y nunca con su propia cuenta. Si el formulario no
+  // envía el campo (personas sin esa facultad), se conserva la vinculación actual.
+  const linkFieldSent = typeof input === "object" && input !== null && "userId" in input;
+  const currentUserId = existing?.userId ?? null;
+  const userId: string | null = linkFieldSent ? (d.userId ?? null) : currentUserId;
+  const linkChanged = userId !== currentUserId;
+  if (linkChanged) {
+    if (actor.role !== "OWNER") throw new ForbiddenError("Solo el propietario puede vincular o desvincular la cuenta de un profesional.");
+    if (userId) {
+      if (userId === actor.id) throw new ForbiddenError("No puedes vincular tu propia cuenta a un perfil profesional.");
+      const u = await db.user.findUnique({ where: { id: userId }, include: { professional: true } });
+      if (!u || u.role !== "DOCTOR" || u.status === "DISABLED") {
+        throw new ValidationError("Solo se pueden vincular cuentas activas con rol de profesional de la salud.");
+      }
+      if (u.professional && u.professional.id !== id) throw new ConflictError("Esa cuenta ya está vinculada a otro perfil profesional.");
+    }
+  }
   const verifiedNow = d.credentialsVerified && !existing?.credentialsVerifiedAt;
   const base = {
     honorific: d.honorific ?? null,
@@ -184,7 +197,13 @@ export async function saveProfessional(actor: Actor, id: string | null, input: u
           action: id ? "catalogo.profesional_editar" : "catalogo.profesional_crear",
           entityType: "Professional",
           entityId: p.id,
-          details: { estado: d.status, publicado: d.isPublished, credencialesVerificadas: d.credentialsVerified, verificadoAhora: verifiedNow },
+          details: {
+            estado: d.status,
+            publicado: d.isPublished,
+            credencialesVerificadas: d.credentialsVerified,
+            verificadoAhora: verifiedNow,
+            ...(linkChanged ? { cuentaAnterior: currentUserId, cuentaNueva: userId } : {}),
+          },
         },
         tx,
       );

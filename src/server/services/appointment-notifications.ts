@@ -5,6 +5,7 @@ import { formatLongDate, formatTime } from "@/lib/format";
 import { appointmentVars, kickMessageQueue, queueMessage } from "./messaging";
 import { notifyUser } from "./notifications";
 import { getSystemSetting } from "./settings";
+import { safeErrorSummary } from "@/server/errors";
 
 const IN_APP_TITLES: Partial<Record<MessageEvent, string>> = {
   APPOINTMENT_BOOKED: "Cita agendada",
@@ -65,7 +66,7 @@ export async function notifyAppointmentEvent(appointmentId: string, event: Messa
     }
     kickMessageQueue();
   } catch (error) {
-    console.error("[cmio] No se pudo registrar la notificación de la cita:", (error as Error).message);
+    console.error("[cmio] No se pudo registrar la notificación de la cita:", safeErrorSummary(error));
   }
 }
 

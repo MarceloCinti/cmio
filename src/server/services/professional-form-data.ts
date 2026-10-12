@@ -6,7 +6,7 @@ export async function professionalFormOptions(currentUserId: string | null) {
     db.specialty.findMany({ orderBy: { sortOrder: "asc" }, select: { id: true, name: true } }),
     db.service.findMany({ orderBy: { sortOrder: "asc" }, select: { id: true, name: true, availabilityConfirmed: true } }),
     db.user.findMany({
-      where: { role: { in: ["OWNER", "ADMIN", "DOCTOR"] }, status: { not: "DISABLED" }, OR: [{ professional: null }, ...(currentUserId ? [{ id: currentUserId }] : [])] },
+      where: { role: "DOCTOR", status: { not: "DISABLED" }, OR: [{ professional: null }, ...(currentUserId ? [{ id: currentUserId }] : [])] },
       orderBy: { name: "asc" },
       select: { id: true, name: true, email: true },
     }),
