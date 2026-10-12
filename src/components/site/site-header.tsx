@@ -35,7 +35,12 @@ export function SiteHeader({ shortName, subtitle, logoPath, logoAlt, phoneHref, 
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
 
-  useEffect(() => setOpen(false), [pathname]);
+  // Cierra el menú al navegar (ajuste de estado durante el render, sin efecto).
+  const [menuPath, setMenuPath] = useState(pathname);
+  if (menuPath !== pathname) {
+    setMenuPath(pathname);
+    setOpen(false);
+  }
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
     onScroll();

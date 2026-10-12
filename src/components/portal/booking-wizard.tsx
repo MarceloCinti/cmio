@@ -40,6 +40,8 @@ export function BookingWizard({
   const [serviceId, setServiceId] = useState<string | null>(null);
   const [professionalId, setProfessionalId] = useState<string | null>(preProf?.id ?? null);
   const [startsAt, setStartsAt] = useState<string | null>(null);
+  // Se calcula al elegir el horario (no durante el render) para mantener el componente puro.
+  const [selectedAt, setSelectedAt] = useState(0);
 
   const specialty = specialties.find((s) => s.id === specialtyId) ?? null;
   const services = specialty?.services ?? [];
@@ -142,7 +144,11 @@ export function BookingWizard({
           <h2 id="horario-titulo" className="mb-4 text-lg font-semibold text-ink">
             Elige fecha y horario
           </h2>
-          <SlotPicker professionalId={professionalId} serviceId={serviceId} value={startsAt} onChange={setStartsAt} />
+          <SlotPicker professionalId={professionalId} serviceId={serviceId} value={startsAt} onChange={(v) => {
+              setStartsAt(v);
+              setSelectedAt(Date.now());
+            }}
+          />
         </section>
       ) : null}
 
@@ -175,7 +181,7 @@ export function BookingWizard({
             hint="Por ejemplo, si es tu primera consulta. No incluyas información médica sensible."
           />
           <p className="text-sm text-muted">{cancellationPolicy}</p>
-          {new Date(startsAt).getTime() - Date.now() < cancelMinHours * 3600_000 ? (
+          {new Date(startsAt).getTime() - selectedAt < cancelMinHours * 3600_000 ? (
             <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900" role="note">
               Este horario es dentro de las próximas {cancelMinHours} horas: si luego necesitas cancelarlo, deberás comunicarte con la secretaría.
             </p>

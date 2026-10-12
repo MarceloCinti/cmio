@@ -48,7 +48,7 @@ export async function sendEmail(message: EmailMessage): Promise<SendResult> {
   }
   const from = e.EMAIL_FROM ?? "CMIO <no-responder@localhost>";
   if (e.EMAIL_DRIVER === "file") {
-    const dir = path.resolve(process.cwd(), process.env.EMAIL_FILE_DIR ?? path.join(".data", "mail"));
+    const dir = path.resolve(/* turbopackIgnore: true */ process.cwd(), process.env.EMAIL_FILE_DIR ?? path.join(/* turbopackIgnore: true */ ".data", "mail"));
     await mkdir(dir, { recursive: true });
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const content = [`From: ${from}`, `To: ${message.to}`, `Subject: ${message.subject}`, `Date: ${new Date().toUTCString()}`, "", message.text].join("\n");

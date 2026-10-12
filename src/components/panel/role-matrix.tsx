@@ -2,7 +2,7 @@
 
 import { Save } from "lucide-react";
 import { ActionForm, SubmitButton } from "@/components/ui/form";
-import { PERMISSION_GROUPS, PERMISSIONS, ROLE_LABELS, ROLE_PERMISSION_CEILING, type ConfigurableRole } from "@/lib/permissions";
+import { PERMISSION_GROUPS, PERMISSIONS, ROLE_PERMISSION_CEILING, type ConfigurableRole } from "@/lib/permissions";
 import { saveRolePermissionsAction } from "@/app/panel/admin-actions";
 
 export function RolePermissionsForm({ role, granted }: { role: ConfigurableRole; granted: string[] }) {

@@ -33,12 +33,12 @@ export function detectMime(buf: Buffer): AllowedMime | null {
 }
 
 function root() {
-  return path.resolve(process.cwd(), env().STORAGE_LOCAL_PATH);
+  return path.resolve(/* turbopackIgnore: true */ process.cwd(), env().STORAGE_LOCAL_PATH);
 }
 
 function resolveKey(key: string) {
   if (!KEY_PATTERN.test(key)) throw new Error("Clave de almacenamiento inválida");
-  const full = path.resolve(root(), key);
+  const full = path.resolve(/* turbopackIgnore: true */ root(), key);
   if (!full.startsWith(root() + path.sep)) throw new Error("Ruta fuera del almacenamiento");
   return full;
 }

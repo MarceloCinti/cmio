@@ -126,7 +126,12 @@ function NavList({ groups, pathname, onNavigate }: { groups: NavGroup[]; pathnam
 export function PanelShell({ groups, user, unread, shortName, logoPath, logoAlt, logoutAction, mobileTabs, children, banner }: Props) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  useEffect(() => setOpen(false), [pathname]);
+  // Cierra el menú al navegar (ajuste de estado durante el render, sin efecto).
+  const [menuPath, setMenuPath] = useState(pathname);
+  if (menuPath !== pathname) {
+    setMenuPath(pathname);
+    setOpen(false);
+  }
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => {

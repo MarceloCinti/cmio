@@ -3,7 +3,6 @@ import { PageHeader } from "@/components/panel/page-header";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { StatTile } from "@/components/panel/stat-tile";
 import { BarList } from "@/components/charts/bar-list";
-import { ColumnChart } from "@/components/charts/column-chart";
 import { inputClasses } from "@/components/ui/form";
 import { requirePermission } from "@/server/auth/current";
 import { can } from "@/server/auth/actor";

@@ -5,7 +5,6 @@ import { assertCan, assertClinician, can, isClinician, type Actor } from "@/serv
 import { audit } from "@/server/audit";
 import { generateReadableCode } from "@/server/auth/crypto";
 import { AppError, ConflictError, ForbiddenError, NotFoundError, ValidationError } from "@/server/errors";
-import type { Prisma } from "@/generated/prisma/client";
 import {
   addendumSchema,
   backgroundSchema,

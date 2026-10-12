@@ -198,7 +198,7 @@ export async function saveContentDraftAction(_: ActionState, fd: FormData): Prom
   }, "Borrador guardado. Revisa la vista previa y publica cuando esté listo.");
 }
 
-export async function publishContentAction(_: ActionState, fd: FormData): Promise<ActionState> {
+export async function publishContentAction(_: ActionState, _fd: FormData): Promise<ActionState> {
   const actor = await requireStaff();
   let published: string[] = [];
   const result = await runAction(async () => {

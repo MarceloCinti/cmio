@@ -11,6 +11,8 @@ import { formatLongDate, formatTime } from "@/lib/format";
 
 export const metadata = { title: "Mis citas" };
 
+type PatientAppointments = Awaited<ReturnType<typeof listPatientAppointments>>;
+
 export default async function MyAppointmentsPage() {
   const actor = await requirePatient();
   const all = await listPatientAppointments(actor, actor.patientId);
@@ -20,7 +22,41 @@ export default async function MyAppointmentsPage() {
     .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime());
   const history = all.filter((a) => !upcoming.includes(a));
 
-  const List = ({ items }: { items: typeof all }) => (
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-ink sm:text-3xl">Mis citas</h1>
+          <p className="mt-1 text-muted">Consulta, confirma, cancela o reprograma tus citas.</p>
+        </div>
+        <ButtonLink href="/portal/citas/nueva" icon={<CalendarPlus className="size-5" aria-hidden="true" />}>
+          Agendar una consulta
+        </ButtonLink>
+      </div>
+      <section aria-labelledby="proximas">
+        <h2 id="proximas" className="mb-3 text-lg font-semibold text-ink">
+          Próximas
+        </h2>
+        <Card>
+          {upcoming.length ? (
+            <AppointmentList items={upcoming} />
+          ) : (
+            <EmptyState title="No tienes citas próximas" description="Cuando agendes una cita aparecerá aquí." />
+          )}
+        </Card>
+      </section>
+      <section aria-labelledby="historial">
+        <h2 id="historial" className="mb-3 text-lg font-semibold text-ink">
+          Historial
+        </h2>
+        <Card>{history.length ? <AppointmentList items={history} /> : <EmptyState title="Todavía no hay citas anteriores" />}</Card>
+      </section>
+    </div>
+  );
+}
+
+function AppointmentList({ items }: { items: PatientAppointments }) {
+  return (
     <ul className="divide-y divide-line">
       {items.map((a) => (
         <li key={a.id}>
@@ -43,37 +79,5 @@ export default async function MyAppointmentsPage() {
         </li>
       ))}
     </ul>
-  );
-
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-ink sm:text-3xl">Mis citas</h1>
-          <p className="mt-1 text-muted">Consulta, confirma, cancela o reprograma tus citas.</p>
-        </div>
-        <ButtonLink href="/portal/citas/nueva" icon={<CalendarPlus className="size-5" aria-hidden="true" />}>
-          Agendar una consulta
-        </ButtonLink>
-      </div>
-      <section aria-labelledby="proximas">
-        <h2 id="proximas" className="mb-3 text-lg font-semibold text-ink">
-          Próximas
-        </h2>
-        <Card>
-          {upcoming.length ? (
-            <List items={upcoming} />
-          ) : (
-            <EmptyState title="No tienes citas próximas" description="Cuando agendes una cita aparecerá aquí." />
-          )}
-        </Card>
-      </section>
-      <section aria-labelledby="historial">
-        <h2 id="historial" className="mb-3 text-lg font-semibold text-ink">
-          Historial
-        </h2>
-        <Card>{history.length ? <List items={history} /> : <EmptyState title="Todavía no hay citas anteriores" />}</Card>
-      </section>
-    </div>
   );
 }

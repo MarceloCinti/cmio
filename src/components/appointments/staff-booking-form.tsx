@@ -154,13 +154,11 @@ function PatientSearch({ onSelect }: { onSelect: (p: PatientOption) => void }) {
   const [pending, start] = useTransition();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const active = q.trim().length >= 2;
+  const shown = active ? results : [];
   useEffect(() => {
     if (timer.current) clearTimeout(timer.current);
-    if (q.trim().length < 2) {
-      setResults([]);
-      setSearched(false);
-      return;
-    }
+    if (q.trim().length < 2) return;
     timer.current = setTimeout(() => {
       start(async () => {
         setResults(await searchPatientsForBookingAction(q));
@@ -187,11 +185,11 @@ function PatientSearch({ onSelect }: { onSelect: (p: PatientOption) => void }) {
         </span>
       </label>
       <div id="patient-search-status" aria-live="polite" className="text-sm text-muted">
-        {pending ? <Spinner className="size-4" label="Buscando…" /> : searched && !results.length ? "No se encontraron pacientes." : null}
+        {pending ? <Spinner className="size-4" label="Buscando…" /> : active && searched && !shown.length ? "No se encontraron pacientes." : null}
       </div>
-      {results.length ? (
+      {shown.length ? (
         <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line">
-          {results.map((r) => (
+          {shown.map((r) => (
             <li key={r.id}>
               <button type="button" onClick={() => onSelect(r)} className="flex w-full flex-col items-start px-4 py-3 text-left hover:bg-primary-soft">
                 <span className="font-medium text-ink">{r.label}</span>

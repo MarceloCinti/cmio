@@ -1,7 +1,10 @@
 import type { MetadataRoute } from "next";
+import { connection } from "next/server";
 import { listPublishedProfessionals, listPublishedSpecialties } from "@/server/services/public-site";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // Se genera en cada solicitud para reflejar especialidades y perfiles publicados desde el panel.
+  await connection();
   const base = process.env.APP_URL ?? "http://localhost:3000";
   const [specialties, professionals] = await Promise.all([listPublishedSpecialties(), listPublishedProfessionals()]);
   const staticPaths = [

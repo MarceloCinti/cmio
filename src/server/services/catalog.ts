@@ -142,7 +142,7 @@ export async function saveProfessional(actor: Actor, id: string | null, input: u
     if (!d.bio || d.bio.length < 30) problems.push("debe tener una descripción profesional de al menos 30 caracteres");
     if (problems.length) throw new ValidationError(`Para publicar el perfil: ${problems.join(", ")}.`, { isPublished: ["Completa el perfil antes de publicarlo."] });
   }
-  let userId: string | null = d.userId ?? null;
+  const userId: string | null = d.userId ?? null;
   if (userId) {
     const u = await db.user.findUnique({ where: { id: userId }, include: { professional: true } });
     if (!u || u.role === "PATIENT") throw new ValidationError("La cuenta seleccionada no es válida para un profesional.");
