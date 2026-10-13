@@ -79,7 +79,7 @@ export const LANDING_FIELDS: FieldDesc[] = [
         type: "text",
         hint: "Muestra, debajo de los botones, una tarjeta con su foto que enlaza a su perfil publicado. Escribe el identificador (por ejemplo dr-hugo-rojas) o pega la dirección del perfil. Déjalo vacío para ocultarla.",
       },
-      { key: "featuredRole", label: "Texto bajo el nombre del profesional destacado", type: "text", hint: "Hasta 40 caracteres. Por ejemplo: Al frente del CMIO." },
+      { key: "featuredRole", label: "Texto bajo el nombre del profesional destacado", type: "text", hint: "Breve, idealmente hasta 40 caracteres (se muestra en dos líneas como máximo). Por ejemplo: Al frente del CMIO." },
     ],
   },
   {

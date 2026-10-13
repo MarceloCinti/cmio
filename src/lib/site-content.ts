@@ -8,6 +8,11 @@ const hex = z.string().regex(/^#[0-9a-fA-F]{6}$/, "Usa un color hexadecimal, por
 const text = (max: number) => z.string().trim().max(max, `Máximo ${max} caracteres`);
 const reqText = (max: number) => text(max).min(1, "Este campo es obligatorio");
 
+/** Identificador de un perfil a partir de lo que se escriba o pegue (p. ej., /profesionales/dr-hugo-rojas). */
+export function profileSlug(value: string) {
+  return (value.split(/[?#]/)[0].split("/").filter(Boolean).pop() ?? "").trim().toLowerCase();
+}
+
 export const FONT_PAIRS = {
   moderna: { label: "Moderna (Plus Jakarta Sans + Inter)", heading: "Plus Jakarta Sans Variable", body: "Inter Variable" },
   clasica: { label: "Clásica (Source Serif 4 + Inter)", heading: "Source Serif 4 Variable", body: "Inter Variable" },
@@ -70,9 +75,11 @@ export const landingSchema = z.object({
     imageCaption: text(80).default(""),
     // Profesional destacado: tarjeta con su retrato que enlaza a su perfil. Los datos (nombre,
     // foto) salen del perfil publicado; si el perfil no está publicado, la tarjeta no se muestra.
-    // Se muestra fuera de la foto principal, que puede ser una imagen ilustrativa.
-    featuredProfessionalSlug: text(80).default(""),
-    featuredRole: text(40).default(""),
+    // Se muestra fuera de la foto principal, que puede ser una imagen ilustrativa. Se guarda solo
+    // el identificador aunque se pegue la dirección completa del perfil.
+    featuredProfessionalSlug: text(500).transform(profileSlug).pipe(text(80)).default(""),
+    // No bajar este límite sin migrar los datos guardados: un campo inválido descarta toda la portada.
+    featuredRole: text(60).default(""),
   }),
   about: z.object({
     title: reqText(80),

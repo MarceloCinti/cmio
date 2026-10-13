@@ -74,6 +74,11 @@ docker compose --env-file .env.production logs -f migrate app
 Orden de arranque: `db` → `migrate` (aplica migraciones y `db:seed`, luego termina) → `app`
 → `cron`.
 
+`db:seed` nunca pisa datos existentes. Cuando una versión cambia un valor predeterminado (por
+ejemplo, la portada), `prisma/seed-upgrades.ts` lo actualiza una sola vez y solo si sigue igual
+al valor anterior: lo editado desde el panel no se toca. Cada actualización deja una marca en
+`system_settings` (`seed.actualizacion.*`).
+
 Después del primer arranque:
 
 1. Ingresa con la cuenta del propietario y cambia la contraseña si fue compartida.

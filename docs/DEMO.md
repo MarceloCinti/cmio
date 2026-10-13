@@ -63,8 +63,11 @@ Usa una base nueva para producción: no mezcles datos de demostración con datos
 
 Para mostrar la plataforma sin instalar nada se puede publicar una instancia separada, con su
 **propia base de datos** (nunca la base real de la clínica). `vercel.json` y
-`scripts/vercel-build.sh` ya están preparados: en cada despliegue se aplican las migraciones, los
-datos base y, si corresponde, los datos de demostración, y luego se compila. Ubica las funciones (`regions` en `vercel.json`) en la misma región que la base de datos.
+`scripts/vercel-build.sh` ya están preparados: en cada despliegue **de producción** se aplican las
+migraciones, los datos base y, si corresponde, los datos de demostración, y luego se compila. Las
+vistas previas (cada push a una rama) solo compilan: no modifican la base, porque comparten sus
+variables con producción. Si una vista previa trae una migración nueva, fallará hasta desplegarla
+en producción. Ubica las funciones (`regions` en `vercel.json`) en la misma región que la base de datos.
 
 Variables de entorno del proyecto en Vercel:
 

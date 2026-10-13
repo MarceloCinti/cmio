@@ -30,6 +30,8 @@ export async function generateMetadata({ params }: PageProps<"/profesionales/[sl
       description,
       images: p.photoPath ? [{ url: p.photoPath, alt: `Fotografía de ${name}` }] : [],
     },
+    // Retrato cuadrado: tarjeta «summary» (la «large image» recortaría la cara).
+    twitter: { card: "summary", title: name, description, images: p.photoPath ? [{ url: p.photoPath, alt: `Fotografía de ${name}` }] : [] },
   };
 }
 

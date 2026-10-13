@@ -151,7 +151,7 @@ export function HeroSection({
               <span
                 className={cn(
                   "absolute top-4 left-4 rounded-full px-3 py-1.5 text-xs backdrop-blur",
-                  illustrative ? "bg-ink/60 font-medium text-white" : "bg-surface/90 font-semibold text-ink shadow-soft",
+                  illustrative ? "bg-ink/80 font-medium text-white" : "bg-surface/90 font-semibold text-ink shadow-soft",
                 )}
               >
                 {photoNote}
@@ -173,8 +173,9 @@ export function HeroSection({
             <div
               className={cn(
                 "absolute top-4 right-4 hidden rounded-2xl border border-line bg-surface/95 px-4 py-3 shadow-lift backdrop-blur sm:block",
-                // Entre 1024 y 1279 px la foto es angosta: baja para no tapar el aviso de la esquina superior.
-                photoNote && "lg:top-14 xl:top-4",
+                // Entre 1024 y 1279 px la foto es angosta: va abajo a la derecha (sobre la ropa, no sobre
+                // las caras) para no tapar el aviso de la esquina superior.
+                photoNote && "lg:top-auto lg:bottom-20 xl:top-4 xl:bottom-auto",
               )}
             >
               <span className="block text-2xl font-extrabold text-primary">{specialtyCount}</span>

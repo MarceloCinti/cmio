@@ -22,7 +22,7 @@ export default function CreditsPage() {
             {CLINIC_IMAGE_LIST.map((img) => (
               <li key={img.path} className="overflow-hidden rounded-2xl border border-line bg-surface">
                 <div className="relative aspect-[16/10] bg-primary-soft">
-                  <Image src={img.path} alt={img.alt} fill sizes="(min-width: 1024px) 30vw, 100vw" className={img.width === img.height ? "object-cover" : "object-cover object-[center_25%]"} />
+                  <Image src={img.path} alt={img.alt} fill sizes="(min-width: 1024px) 30vw, 100vw" className={img.width === img.height ? "object-contain" : "object-cover object-[center_25%]"} />
                 </div>
                 <div className="space-y-1 p-4 text-sm">
                   <p className="text-ink">{img.alt}</p>
