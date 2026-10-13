@@ -51,3 +51,27 @@ accesible desde internet con datos reales.
 ## Eliminar los datos de demostración
 
 Usa una base nueva para producción: no mezcles datos de demostración con datos reales.
+
+## Instancia de demostración en línea (Vercel)
+
+Para mostrar la plataforma sin instalar nada se puede publicar una instancia separada, con su
+**propia base de datos** (nunca la base real de la clínica). `vercel.json` y
+`scripts/vercel-build.sh` ya están preparados: en cada despliegue se aplican las migraciones, los
+datos base y, si corresponde, los datos de demostración, y luego se compila.
+
+Variables de entorno del proyecto en Vercel:
+
+| Variable | Valor |
+|---|---|
+| `DATABASE_URL` | Conexión con el rol de mínimo privilegio (pooler en modo transacción) |
+| `MIGRATION_DATABASE_URL` | Conexión con el rol propietario (solo se usa durante el build) |
+| `DEMO_MODE` / `DEMO_ONLINE` | `true` / `true` (ambas son necesarias para cargar datos ficticios en un entorno de producción) |
+| `APP_URL` | URL pública de la instancia (`https://…vercel.app`) |
+| `CRON_SECRET` | 32 caracteres o más |
+| `TRUST_PROXY` | `true` (Vercel define la IP del cliente en `X-Forwarded-For`) |
+| `EMAIL_DRIVER` | `disabled` |
+| `STORAGE_LOCAL_PATH` | `/tmp/cmio-storage` (los archivos subidos **no se conservan** entre ejecuciones) |
+
+Con `DEMO_MODE=true` el sitio responde `noindex` (cabecera, metaetiqueta y `robots.txt`) para que
+no aparezca en buscadores, y muestra el aviso de entorno de demostración. Las contraseñas de
+demostración son públicas: no cargues datos reales en esa instancia.

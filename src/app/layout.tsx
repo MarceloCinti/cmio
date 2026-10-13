@@ -22,6 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
       images: [{ url: landing.hero.imagePath, alt: landing.hero.imageAlt }],
     },
     formatDetection: { telephone: false },
+    ...(process.env.DEMO_MODE === "true" ? { robots: { index: false, follow: false } } : {}),
   };
 }
 

@@ -28,7 +28,11 @@ function localDate(daysFromToday: number, hour: number, minute = 0) {
 async function main() {
   const demo = process.env.DEMO_MODE === "true" || process.env.DEMO_MODE === "1";
   if (!demo) throw new Error("Este script requiere DEMO_MODE=true.");
-  if (process.env.NODE_ENV === "production") throw new Error("No se cargan datos de demostración en producción.");
+  // DEMO_ONLINE=true solo para una instancia pública de demostración con su propia base de
+  // datos (nunca la base real de la clínica).
+  if (process.env.NODE_ENV === "production" && process.env.DEMO_ONLINE !== "true") {
+    throw new Error("No se cargan datos de demostración en producción.");
+  }
   if (await db.user.findUnique({ where: { email: DEMO_ACCOUNTS[0].email } })) {
     console.log("ℹ Los datos de demostración ya existen. No se realizaron cambios.");
     return;

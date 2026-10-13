@@ -40,6 +40,8 @@ const nextConfig: NextConfig = {
           { key: "X-Robots-Tag", value: "noindex, nofollow" },
         ],
       },
+      // Una instancia de demostración nunca debe aparecer en buscadores.
+      ...(process.env.DEMO_MODE === "true" ? [{ source: "/:path*", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] }] : []),
     ];
   },
 };
