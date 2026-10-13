@@ -57,14 +57,15 @@ Usa una base nueva para producción: no mezcles datos de demostración con datos
 Para mostrar la plataforma sin instalar nada se puede publicar una instancia separada, con su
 **propia base de datos** (nunca la base real de la clínica). `vercel.json` y
 `scripts/vercel-build.sh` ya están preparados: en cada despliegue se aplican las migraciones, los
-datos base y, si corresponde, los datos de demostración, y luego se compila.
+datos base y, si corresponde, los datos de demostración, y luego se compila. Ubica las funciones (`regions` en `vercel.json`) en la misma región que la base de datos.
 
 Variables de entorno del proyecto en Vercel:
 
 | Variable | Valor |
 |---|---|
-| `DATABASE_URL` | Conexión con el rol de mínimo privilegio (pooler en modo transacción) |
-| `MIGRATION_DATABASE_URL` | Conexión con el rol propietario (solo se usa durante el build) |
+| `DATABASE_URL` | Conexión con el rol de mínimo privilegio (pooler en modo transacción, con `?sslmode=no-verify`) |
+| `MIGRATION_DATABASE_URL` | Conexión con el rol propietario, sin parámetros (solo se usa durante el build) |
+| `MIGRATION_TLS` | `no-verify` para cifrar la conexión del build sin validar el certificado (pooler de Supabase) |
 | `DEMO_MODE` / `DEMO_ONLINE` | `true` / `true` (ambas son necesarias para cargar datos ficticios en un entorno de producción) |
 | `APP_URL` | URL pública de la instancia (`https://…vercel.app`) |
 | `CRON_SECRET` | 32 caracteres o más |
