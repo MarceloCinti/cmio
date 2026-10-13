@@ -4,6 +4,7 @@ import {
   CtaBand,
   FaqSection,
   HeroSection,
+  findFeaturedProfessional,
   ProfessionalsSection,
   ServicesSection,
   SpecialtiesSection,
@@ -30,7 +31,12 @@ export default async function HomePage() {
   return (
     <>
       <MedicalClinicJsonLd institution={institution} specialties={specialties.map((s) => s.name)} />
-      <HeroSection hero={landing.hero} institution={institution} specialtyCount={specialties.length} />
+      <HeroSection
+        hero={landing.hero}
+        institution={institution}
+        specialtyCount={specialties.length}
+        featured={findFeaturedProfessional(landing.hero, professionals)}
+      />
       <AboutSection about={landing.about} />
       <SpecialtiesSection section={landing.specialties} specialties={specialties} />
       <StepsSection steps={landing.steps} />

@@ -67,7 +67,19 @@ export const LANDING_FIELDS: FieldDesc[] = [
       { key: "secondaryCta", label: "Botón secundario", type: "text" },
       { key: "imagePath", label: "Imagen principal", type: "image", altKey: "imageAlt" },
       { key: "imageAlt", label: "Descripción de la imagen (texto alternativo)", type: "text" },
-      { key: "imageCaption", label: "Leyenda sobre la foto (opcional, p. ej. nombre del profesional)", type: "text" },
+      {
+        key: "imageCaption",
+        label: "Leyenda sobre la foto (opcional)",
+        type: "text",
+        hint: "Solo si la foto muestra a un profesional del CMIO: escribe su nombre. Déjala vacía para imágenes ilustrativas.",
+      },
+      {
+        key: "featuredProfessionalSlug",
+        label: "Profesional destacado (identificador del perfil)",
+        type: "text",
+        hint: "Muestra una tarjeta con su foto que enlaza a su perfil, por ejemplo dr-hugo-rojas (es la última parte de la dirección del perfil). Déjalo vacío para ocultarla.",
+      },
+      { key: "featuredRole", label: "Texto bajo el nombre del profesional destacado", type: "text", hint: "Por ejemplo: Al frente del CMIO." },
     ],
   },
   {

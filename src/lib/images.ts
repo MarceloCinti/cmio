@@ -149,6 +149,13 @@ export function stockImageByPath(path: string | null | undefined): StockImage | 
 export type ClinicImage = { path: string; alt: string; source: string; width: number; height: number };
 
 export const CLINIC_IMAGES = {
+  drHugoRojasRetrato: {
+    path: "/images/equipo/dr-hugo-rojas-retrato.jpg",
+    alt: "Retrato del Dr. Hugo Rojas, sonriente",
+    source: "Fotografía proporcionada por el CMIO",
+    width: 300,
+    height: 300,
+  },
   drHugoRojas: {
     path: "/images/equipo/dr-hugo-rojas.jpg",
     alt: "Dr. Hugo Rojas, médico del CMIO, con el uniforme de la clínica",

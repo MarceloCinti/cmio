@@ -68,6 +68,10 @@ export const landingSchema = z.object({
     imageAlt: reqText(200),
     // Leyenda visible sobre la foto (p. ej., el nombre del profesional retratado).
     imageCaption: text(80).default(""),
+    // Profesional destacado: tarjeta con su retrato que enlaza a su perfil. Los datos (nombre,
+    // foto) salen del perfil publicado; si el perfil no está publicado, la tarjeta no se muestra.
+    featuredProfessionalSlug: text(80).default(""),
+    featuredRole: text(60).default(""),
   }),
   about: z.object({
     title: reqText(80),
@@ -181,9 +185,12 @@ export const DEFAULT_LANDING: Landing = {
       "Atención médica multidisciplinaria para acompañarte en el cuidado de tu peso, tu salud metabólica y tu calidad de vida.",
     primaryCta: "Agendar una consulta",
     secondaryCta: "Conocer nuestros servicios",
-    imagePath: "/images/equipo/dr-hugo-rojas.jpg",
-    imageAlt: "Dr. Hugo Rojas, médico del CMIO, con el uniforme de la clínica",
-    imageCaption: "Dr. Hugo Rojas · CMIO",
+    // Imagen ilustrativa (banco de imágenes): no se rotula con el nombre de ningún profesional.
+    imagePath: "/images/consulta-medica.jpg",
+    imageAlt: "Médica sonriente conversando con un paciente en un consultorio luminoso",
+    imageCaption: "",
+    featuredProfessionalSlug: "dr-hugo-rojas",
+    featuredRole: "Al frente del CMIO",
   },
   about: {
     title: "La clínica",

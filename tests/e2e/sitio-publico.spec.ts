@@ -14,6 +14,17 @@ test.describe("Sitio público", () => {
     expect(errors).toEqual([]);
   });
 
+  test("la portada destaca al Dr. Hugo Rojas con enlace a su perfil publicado", async ({ page }) => {
+    await page.goto("/");
+    const hero = page.locator('section[aria-labelledby="hero-titulo"]');
+    const card = hero.getByRole("link", { name: /Dr\. Hugo Rojas/ });
+    await expect(card).toBeVisible();
+    await expect(card).toContainText("Al frente del CMIO");
+    await card.click();
+    await expect(page).toHaveURL(/\/profesionales\/dr-hugo-rojas$/);
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Hugo Rojas");
+  });
+
   test("muestra datos de contacto y horario configurables", async ({ page }) => {
     await page.goto("/contacto");
     await expect(page.getByText("+595 974 824 111").first()).toBeVisible();

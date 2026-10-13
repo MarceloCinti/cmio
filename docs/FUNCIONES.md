@@ -15,7 +15,7 @@ implementado se lista en [PENDIENTES.md](PENDIENTES.md).
 | Mapa que se carga solo a pedido | Implementado |
 | Formularios de contacto y solicitud de cita con consentimiento, límites y trampa para bots | Implementado y probado |
 | Privacidad, términos, aviso de tratamiento de datos (borradores marcados "en revisión") | Implementado |
-| Identidad visual del CMIO (logotipo y colores tomados de su Instagram), foto del Dr. Hugo Rojas en la portada y del Dr. Francisco Ríos en "La clínica" | Implementado y verificado (capturas) |
+| Identidad visual del CMIO (logotipo y colores tomados de su Instagram), tarjeta del Dr. Hugo Rojas en la portada (retrato y enlace a su perfil, configurable en Contenido → Portada) y foto del Dr. Francisco Ríos en "La clínica" | Implementado y verificado (capturas) |
 | Cirugía general (vesícula, hernias) y financiación de cirugías, enlace a Instagram @cmio_2024 | Implementado (contenido publicado por la clínica en Instagram) |
 | Créditos de imágenes (fotos del CMIO con su fuente; Pexels con autor y enlace) | Implementado |
 | Verificación pública de recetas y órdenes por código (solo iniciales) | Implementado |

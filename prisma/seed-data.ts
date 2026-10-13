@@ -59,7 +59,7 @@ export const SPECIALTIES = [
     summary: "Cirugías generales, de vesícula y de hernias, con opciones de financiación.",
     description:
       "El CMIO realiza cirugías generales, entre ellas cirugías de vesícula y de hernias. Ofrecemos opciones de financiación con una entrega inicial y cuotas: consulta las condiciones con la secretaría.",
-    image: STOCK_IMAGES.consultaMedica,
+    image: STOCK_IMAGES.equipoMultidisciplinario,
     sortOrder: 6,
   },
 ] as const;
@@ -259,7 +259,7 @@ export const PROFESSIONALS = [
     firstName: "Hugo",
     lastName: "Rojas",
     bio: "Médico del CMIO, al frente del centro y de su equipo de profesionales.",
-    photo: CLINIC_IMAGES.drHugoRojasPerfil,
+    photo: CLINIC_IMAGES.drHugoRojasRetrato,
     specialtySlugs: [] as string[],
     sortOrder: 0,
   },

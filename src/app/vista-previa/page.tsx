@@ -8,6 +8,7 @@ import {
   CtaBand,
   FaqSection,
   HeroSection,
+  findFeaturedProfessional,
   ProfessionalsSection,
   ServicesSection,
   SpecialtiesSection,
@@ -54,7 +55,12 @@ export default async function PreviewPage() {
         portalLabel="Acceso de pacientes"
       />
       <main id="contenido" className="flex-1">
-        <HeroSection hero={landing.hero} institution={institution} specialtyCount={specialties.length} />
+        <HeroSection
+          hero={landing.hero}
+          institution={institution}
+          specialtyCount={specialties.length}
+          featured={findFeaturedProfessional(landing.hero, professionals)}
+        />
         <AboutSection about={landing.about} />
         <SpecialtiesSection section={landing.specialties} specialties={specialties} />
         <StepsSection steps={landing.steps} />

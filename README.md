@@ -73,8 +73,9 @@ Guía completa: [docs/INSTALACION.md](docs/INSTALACION.md).
 ## Imágenes
 
 - **Fotografías del CMIO** (`public/images/equipo/`, `public/images/marca/`): el Dr. Hugo Rojas,
-  el Dr. Francisco Ríos y el logotipo, tomados de las publicaciones oficiales de la clínica en
-  Instagram (@cmio_2024). Los derechos pertenecen al CMIO.
+  el Dr. Francisco Ríos y el logotipo, proporcionados por la clínica o tomados de sus publicaciones
+  oficiales en Instagram (@cmio_2024). Los derechos pertenecen al CMIO. No se combinan con
+  imágenes de banco (sin montajes).
 - **Imágenes ilustrativas** de Pexels (licencia que permite uso comercial). No representan
   instalaciones, personal ni pacientes del CMIO.
 

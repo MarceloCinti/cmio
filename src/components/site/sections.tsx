@@ -55,16 +55,41 @@ export function SectionHeading({
 // Hero
 // ─────────────────────────────────────────────────────────────
 
+/** Profesional destacado en la portada (datos tomados de su perfil publicado). */
+export type FeaturedProfessional = { slug: string; name: string; photoPath: string | null; role: string };
+
+/** Busca el profesional destacado de la portada entre los perfiles publicados. */
+export function findFeaturedProfessional(
+  hero: Landing["hero"],
+  professionals: { slug: string; honorific: string | null; firstName: string; lastName: string; photoPath: string | null }[],
+): FeaturedProfessional | null {
+  const slug = hero.featuredProfessionalSlug.trim();
+  const p = slug ? professionals.find((x) => x.slug === slug) : undefined;
+  if (!p) return null;
+  return { slug: p.slug, name: [p.honorific, p.firstName, p.lastName].filter(Boolean).join(" "), photoPath: p.photoPath, role: hero.featuredRole };
+}
+
 export function HeroSection({
   hero,
   institution,
   specialtyCount,
+  featured = null,
 }: {
   hero: Landing["hero"];
   institution: Institution;
   specialtyCount: number;
+  featured?: FeaturedProfessional | null;
 }) {
   const hours = institution.hours[0];
+  const initials = featured
+    ? featured.name
+        .replace(/^(Dr|Dra|Lic|Mg)\.\s*/i, "")
+        .split(/\s+/)
+        .slice(0, 2)
+        .map((w) => w[0] ?? "")
+        .join("")
+        .toUpperCase()
+    : "";
   return (
     <section aria-labelledby="hero-titulo" className="relative overflow-hidden">
       <div
@@ -110,37 +135,68 @@ export function HeroSection({
         </div>
 
         <div className="relative">
-          <div className="relative aspect-[4/3] overflow-hidden rounded-[1.75rem] bg-primary-soft shadow-lift sm:aspect-[5/4] lg:aspect-[4/5]">
-            <Image
-              src={hero.imagePath}
-              alt={hero.imageAlt}
-              fill
-              priority
-              sizes="(min-width: 1024px) 45vw, 100vw"
-              className="object-cover object-[center_22%]"
-            />
-            {hero.imageCaption ? (
-              <span className="absolute top-4 left-4 rounded-full bg-surface/90 px-3 py-1.5 text-xs font-semibold text-ink shadow-soft backdrop-blur">
-                {hero.imageCaption}
-              </span>
+          {/* Foto con sus tarjetas: la del horario se ancla al borde inferior de la foto. */}
+          <div className="relative">
+            <div className="relative aspect-[4/3] overflow-hidden rounded-[1.75rem] bg-primary-soft shadow-lift sm:aspect-[5/4] lg:aspect-[4/5]">
+              <Image
+                src={hero.imagePath}
+                alt={hero.imageAlt}
+                fill
+                priority
+                sizes="(min-width: 1024px) 45vw, 100vw"
+                className="object-cover object-[60%_center]"
+              />
+              {hero.imageCaption ? (
+                <span
+                  className={cn(
+                    "absolute top-4 left-4 rounded-full bg-surface/90 px-3 py-1.5 text-xs font-semibold text-ink shadow-soft backdrop-blur",
+                    // Con profesional destacado, su tarjeta ocupa la esquina superior desde tabletas.
+                    featured && "sm:top-auto sm:right-4 sm:bottom-4 sm:left-auto",
+                  )}
+                >
+                  {hero.imageCaption}
+                </span>
+              ) : null}
+            </div>
+            {hours ? (
+              <div className="absolute -bottom-5 left-4 flex items-center gap-3 rounded-2xl border border-line bg-surface/95 px-4 py-3 shadow-lift backdrop-blur sm:left-6">
+                <span className="flex size-10 items-center justify-center rounded-xl bg-primary-soft text-primary">
+                  <Clock className="size-5" aria-hidden="true" />
+                </span>
+                <span className="text-sm leading-tight">
+                  <span className="block font-semibold text-ink">{hours.days}</span>
+                  <span className="text-muted">{hours.hours}</span>
+                </span>
+              </div>
+            ) : null}
+            {specialtyCount > 0 ? (
+              <div
+                className={cn(
+                  "absolute top-4 right-4 hidden rounded-2xl border border-line bg-surface/95 px-4 py-3 shadow-lift backdrop-blur sm:block",
+                  // Entre 1024 y 1279 px la columna de la foto no tiene lugar para las dos tarjetas superiores.
+                  featured && "lg:hidden xl:block",
+                )}
+              >
+                <span className="block text-2xl font-extrabold text-primary">{specialtyCount}</span>
+                <span className="text-xs font-medium text-muted">especialidades en un mismo lugar</span>
+              </div>
             ) : null}
           </div>
-          {hours ? (
-            <div className="absolute -bottom-5 left-4 flex items-center gap-3 rounded-2xl border border-line bg-surface/95 px-4 py-3 shadow-lift backdrop-blur sm:left-6">
-              <span className="flex size-10 items-center justify-center rounded-xl bg-primary-soft text-primary">
-                <Clock className="size-5" aria-hidden="true" />
+          {featured ? (
+            // En celulares va debajo de la foto para no tapar a las personas retratadas.
+            <Link
+              href={`/profesionales/${featured.slug}`}
+              className="group mt-10 flex items-center gap-3 rounded-2xl border border-line bg-surface/95 py-2 pr-4 pl-2 shadow-lift backdrop-blur transition hover:border-primary sm:absolute sm:top-4 sm:left-4 sm:mt-0 sm:max-w-[15rem]"
+            >
+              <span className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary-soft font-bold text-primary ring-2 ring-surface">
+                {featured.photoPath ? <Image src={featured.photoPath} alt="" fill sizes="48px" className="object-cover" /> : <span aria-hidden="true">{initials}</span>}
               </span>
-              <span className="text-sm leading-tight">
-                <span className="block font-semibold text-ink">{hours.days}</span>
-                <span className="text-muted">{hours.hours}</span>
+              <span className="min-w-0 flex-1 leading-tight">
+                <span className="block truncate text-sm font-semibold text-ink">{featured.name}</span>
+                {featured.role ? <span className="mt-0.5 block truncate text-xs text-muted">{featured.role}</span> : null}
               </span>
-            </div>
-          ) : null}
-          {specialtyCount > 0 ? (
-            <div className="absolute top-4 right-4 hidden rounded-2xl border border-line bg-surface/95 px-4 py-3 shadow-lift backdrop-blur sm:block">
-              <span className="block text-2xl font-extrabold text-primary">{specialtyCount}</span>
-              <span className="text-xs font-medium text-muted">especialidades en un mismo lugar</span>
-            </div>
+              <ArrowRight className="size-4 shrink-0 text-primary transition group-hover:translate-x-0.5" aria-hidden="true" />
+            </Link>
           ) : null}
         </div>
       </div>
