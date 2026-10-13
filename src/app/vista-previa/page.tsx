@@ -8,7 +8,6 @@ import {
   CtaBand,
   FaqSection,
   HeroSection,
-  findFeaturedProfessional,
   ProfessionalsSection,
   ServicesSection,
   SpecialtiesSection,
@@ -17,6 +16,7 @@ import {
 import { BrandStyle } from "@/components/brand/brand-style";
 import { requirePermission } from "@/server/auth/current";
 import { getSiteContent } from "@/server/services/settings";
+import { findFeaturedProfessional } from "@/lib/featured-professional";
 import { listPublicServices, listPublishedFaqs, listPublishedProfessionals, listPublishedSpecialties } from "@/server/services/public-site";
 import { telHref, whatsappHref } from "@/lib/site-content";
 

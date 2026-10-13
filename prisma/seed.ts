@@ -7,6 +7,7 @@ import { hash } from "@node-rs/argon2";
 import type { Prisma } from "../src/generated/prisma/client";
 import { createScriptClient } from "./script-client";
 import { FAQS, PROFESSIONALS, SERVICES, SPECIALTIES } from "./seed-data";
+import { applySeedUpgrades } from "./seed-upgrades";
 import { CONFIGURABLE_ROLES, DEFAULT_ROLE_PERMISSIONS } from "../src/lib/permissions";
 import { DEFAULT_SITE_CONTENT, SITE_CONTENT_KEYS } from "../src/lib/site-content";
 import { SYSTEM_SETTING_DEFAULTS } from "../src/lib/system-settings";
@@ -184,6 +185,8 @@ async function main() {
   await seedContent();
   await seedCatalog();
   await seedProfessionals();
+  const upgraded = await applySeedUpgrades(db);
+  if (upgraded.length) console.log(`✓ Datos base actualizados: ${upgraded.join(", ")}`);
   await seedTemplates();
   await seedOwner();
 }

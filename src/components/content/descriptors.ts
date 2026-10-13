@@ -71,15 +71,15 @@ export const LANDING_FIELDS: FieldDesc[] = [
         key: "imageCaption",
         label: "Leyenda sobre la foto (opcional)",
         type: "text",
-        hint: "Solo si la foto muestra a un profesional del CMIO: escribe su nombre. Déjala vacía para imágenes ilustrativas.",
+        hint: "Solo si la foto muestra a un profesional del CMIO: escribe su nombre. Con una imagen de la biblioteca ilustrativa no se muestra la leyenda sino el aviso «Imagen ilustrativa».",
       },
       {
         key: "featuredProfessionalSlug",
         label: "Profesional destacado (identificador del perfil)",
         type: "text",
-        hint: "Muestra una tarjeta con su foto que enlaza a su perfil, por ejemplo dr-hugo-rojas (es la última parte de la dirección del perfil). Déjalo vacío para ocultarla.",
+        hint: "Muestra, debajo de los botones, una tarjeta con su foto que enlaza a su perfil publicado. Escribe el identificador (por ejemplo dr-hugo-rojas) o pega la dirección del perfil. Déjalo vacío para ocultarla.",
       },
-      { key: "featuredRole", label: "Texto bajo el nombre del profesional destacado", type: "text", hint: "Por ejemplo: Al frente del CMIO." },
+      { key: "featuredRole", label: "Texto bajo el nombre del profesional destacado", type: "text", hint: "Hasta 40 caracteres. Por ejemplo: Al frente del CMIO." },
     ],
   },
   {

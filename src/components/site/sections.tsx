@@ -24,6 +24,8 @@ import { SERVICE_CATEGORY_LABELS } from "@/lib/labels";
 import { ContactForm } from "./contact-form";
 import { MapEmbed } from "./map-embed";
 import { InstagramIcon, socialHandle } from "@/components/site/social";
+import { stockImageByPath } from "@/lib/images";
+import type { FeaturedProfessional } from "@/lib/featured-professional";
 
 export function SectionHeading({
   eyebrow,
@@ -55,20 +57,6 @@ export function SectionHeading({
 // Hero
 // ─────────────────────────────────────────────────────────────
 
-/** Profesional destacado en la portada (datos tomados de su perfil publicado). */
-export type FeaturedProfessional = { slug: string; name: string; photoPath: string | null; role: string };
-
-/** Busca el profesional destacado de la portada entre los perfiles publicados. */
-export function findFeaturedProfessional(
-  hero: Landing["hero"],
-  professionals: { slug: string; honorific: string | null; firstName: string; lastName: string; photoPath: string | null }[],
-): FeaturedProfessional | null {
-  const slug = hero.featuredProfessionalSlug.trim();
-  const p = slug ? professionals.find((x) => x.slug === slug) : undefined;
-  if (!p) return null;
-  return { slug: p.slug, name: [p.honorific, p.firstName, p.lastName].filter(Boolean).join(" "), photoPath: p.photoPath, role: hero.featuredRole };
-}
-
 export function HeroSection({
   hero,
   institution,
@@ -81,15 +69,9 @@ export function HeroSection({
   featured?: FeaturedProfessional | null;
 }) {
   const hours = institution.hours[0];
-  const initials = featured
-    ? featured.name
-        .replace(/^(Dr|Dra|Lic|Mg)\.\s*/i, "")
-        .split(/\s+/)
-        .slice(0, 2)
-        .map((w) => w[0] ?? "")
-        .join("")
-        .toUpperCase()
-    : "";
+  // Una imagen de banco nunca se rotula con el nombre de una persona: se aclara que es ilustrativa.
+  const illustrative = Boolean(stockImageByPath(hero.imagePath));
+  const photoNote = illustrative ? "Imagen ilustrativa" : hero.imageCaption;
   return (
     <section aria-labelledby="hero-titulo" className="relative overflow-hidden">
       <div
@@ -132,71 +114,72 @@ export function HeroSection({
               Datos protegidos
             </li>
           </ul>
-        </div>
-
-        <div className="relative">
-          {/* Foto con sus tarjetas: la del horario se ancla al borde inferior de la foto. */}
-          <div className="relative">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-[1.75rem] bg-primary-soft shadow-lift sm:aspect-[5/4] lg:aspect-[4/5]">
-              <Image
-                src={hero.imagePath}
-                alt={hero.imageAlt}
-                fill
-                priority
-                sizes="(min-width: 1024px) 45vw, 100vw"
-                className="object-cover object-[60%_center]"
-              />
-              {hero.imageCaption ? (
-                <span
-                  className={cn(
-                    "absolute top-4 left-4 rounded-full bg-surface/90 px-3 py-1.5 text-xs font-semibold text-ink shadow-soft backdrop-blur",
-                    // Con profesional destacado, su tarjeta ocupa la esquina superior desde tabletas.
-                    featured && "sm:top-auto sm:right-4 sm:bottom-4 sm:left-auto",
-                  )}
-                >
-                  {hero.imageCaption}
-                </span>
-              ) : null}
-            </div>
-            {hours ? (
-              <div className="absolute -bottom-5 left-4 flex items-center gap-3 rounded-2xl border border-line bg-surface/95 px-4 py-3 shadow-lift backdrop-blur sm:left-6">
-                <span className="flex size-10 items-center justify-center rounded-xl bg-primary-soft text-primary">
-                  <Clock className="size-5" aria-hidden="true" />
-                </span>
-                <span className="text-sm leading-tight">
-                  <span className="block font-semibold text-ink">{hours.days}</span>
-                  <span className="text-muted">{hours.hours}</span>
-                </span>
-              </div>
-            ) : null}
-            {specialtyCount > 0 ? (
-              <div
-                className={cn(
-                  "absolute top-4 right-4 hidden rounded-2xl border border-line bg-surface/95 px-4 py-3 shadow-lift backdrop-blur sm:block",
-                  // Entre 1024 y 1279 px la columna de la foto no tiene lugar para las dos tarjetas superiores.
-                  featured && "lg:hidden xl:block",
-                )}
-              >
-                <span className="block text-2xl font-extrabold text-primary">{specialtyCount}</span>
-                <span className="text-xs font-medium text-muted">especialidades en un mismo lugar</span>
-              </div>
-            ) : null}
-          </div>
           {featured ? (
-            // En celulares va debajo de la foto para no tapar a las personas retratadas.
+            // Fuera de la foto: la foto puede ser ilustrativa y no debe asociarse a un profesional real.
             <Link
               href={`/profesionales/${featured.slug}`}
-              className="group mt-10 flex items-center gap-3 rounded-2xl border border-line bg-surface/95 py-2 pr-4 pl-2 shadow-lift backdrop-blur transition hover:border-primary sm:absolute sm:top-4 sm:left-4 sm:mt-0 sm:max-w-[15rem]"
+              className="group mt-8 flex w-full items-center gap-3 rounded-2xl border border-line bg-surface py-2 pr-4 pl-2 shadow-soft transition hover:border-primary sm:w-fit sm:max-w-sm"
             >
-              <span className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary-soft font-bold text-primary ring-2 ring-surface">
-                {featured.photoPath ? <Image src={featured.photoPath} alt="" fill sizes="48px" className="object-cover" /> : <span aria-hidden="true">{initials}</span>}
+              <span className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary-soft font-bold text-primary">
+                {featured.photoPath ? (
+                  <Image src={featured.photoPath} alt="" fill sizes="48px" className="object-cover" />
+                ) : (
+                  <span aria-hidden="true">{featured.initials}</span>
+                )}
               </span>
               <span className="min-w-0 flex-1 leading-tight">
-                <span className="block truncate text-sm font-semibold text-ink">{featured.name}</span>
-                {featured.role ? <span className="mt-0.5 block truncate text-xs text-muted">{featured.role}</span> : null}
+                <span className="line-clamp-2 text-sm font-semibold text-ink">{featured.name}</span>
+                {featured.role ? <span className="mt-0.5 line-clamp-2 text-xs text-muted">{featured.role}</span> : null}
               </span>
               <ArrowRight className="size-4 shrink-0 text-primary transition group-hover:translate-x-0.5" aria-hidden="true" />
             </Link>
+          ) : null}
+        </div>
+
+        <div className="relative">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-[1.75rem] bg-primary-soft shadow-lift sm:aspect-[5/4] lg:aspect-[4/5]">
+            {/* «sizes» considera el recorte: una foto apaisada en el recuadro vertical se ve ~1,9 veces más ancha. */}
+            <Image
+              src={hero.imagePath}
+              alt={hero.imageAlt}
+              fill
+              priority
+              sizes="(min-width: 1180px) 1010px, (min-width: 1024px) 82vw, 120vw"
+              className="object-cover object-[60%_22%]"
+            />
+            {photoNote ? (
+              <span
+                className={cn(
+                  "absolute top-4 left-4 rounded-full px-3 py-1.5 text-xs backdrop-blur",
+                  illustrative ? "bg-ink/60 font-medium text-white" : "bg-surface/90 font-semibold text-ink shadow-soft",
+                )}
+              >
+                {photoNote}
+              </span>
+            ) : null}
+          </div>
+          {hours ? (
+            <div className="absolute -bottom-5 left-4 flex items-center gap-3 rounded-2xl border border-line bg-surface/95 px-4 py-3 shadow-lift backdrop-blur sm:left-6">
+              <span className="flex size-10 items-center justify-center rounded-xl bg-primary-soft text-primary">
+                <Clock className="size-5" aria-hidden="true" />
+              </span>
+              <span className="text-sm leading-tight">
+                <span className="block font-semibold text-ink">{hours.days}</span>
+                <span className="text-muted">{hours.hours}</span>
+              </span>
+            </div>
+          ) : null}
+          {specialtyCount > 0 ? (
+            <div
+              className={cn(
+                "absolute top-4 right-4 hidden rounded-2xl border border-line bg-surface/95 px-4 py-3 shadow-lift backdrop-blur sm:block",
+                // Entre 1024 y 1279 px la foto es angosta: baja para no tapar el aviso de la esquina superior.
+                photoNote && "lg:top-14 xl:top-4",
+              )}
+            >
+              <span className="block text-2xl font-extrabold text-primary">{specialtyCount}</span>
+              <span className="text-xs font-medium text-muted">especialidades en un mismo lugar</span>
+            </div>
           ) : null}
         </div>
       </div>

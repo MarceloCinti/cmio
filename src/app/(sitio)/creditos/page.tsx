@@ -17,12 +17,12 @@ export default function CreditsPage() {
           <h2 id="fotos-cmio" className="text-xl font-semibold text-ink">
             Fotografías del CMIO
           </h2>
-          <p className="mt-2 max-w-3xl text-sm text-muted">Tomadas de las publicaciones oficiales de la clínica. Todos los derechos pertenecen al CMIO.</p>
+          <p className="mt-2 max-w-3xl text-sm text-muted">Proporcionadas por la clínica o tomadas de sus publicaciones oficiales. Todos los derechos pertenecen al CMIO.</p>
           <ul className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {CLINIC_IMAGE_LIST.map((img) => (
               <li key={img.path} className="overflow-hidden rounded-2xl border border-line bg-surface">
                 <div className="relative aspect-[16/10] bg-primary-soft">
-                  <Image src={img.path} alt={img.alt} fill sizes="(min-width: 1024px) 30vw, 100vw" className="object-cover object-[center_25%]" />
+                  <Image src={img.path} alt={img.alt} fill sizes="(min-width: 1024px) 30vw, 100vw" className={img.width === img.height ? "object-cover" : "object-cover object-[center_25%]"} />
                 </div>
                 <div className="space-y-1 p-4 text-sm">
                   <p className="text-ink">{img.alt}</p>

@@ -4,13 +4,13 @@ import {
   CtaBand,
   FaqSection,
   HeroSection,
-  findFeaturedProfessional,
   ProfessionalsSection,
   ServicesSection,
   SpecialtiesSection,
   StepsSection,
 } from "@/components/site/sections";
 import { getSiteContent } from "@/server/services/settings";
+import { findFeaturedProfessional } from "@/lib/featured-professional";
 import {
   listPublicServices,
   listPublishedFaqs,

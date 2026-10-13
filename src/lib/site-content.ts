@@ -70,8 +70,9 @@ export const landingSchema = z.object({
     imageCaption: text(80).default(""),
     // Profesional destacado: tarjeta con su retrato que enlaza a su perfil. Los datos (nombre,
     // foto) salen del perfil publicado; si el perfil no está publicado, la tarjeta no se muestra.
+    // Se muestra fuera de la foto principal, que puede ser una imagen ilustrativa.
     featuredProfessionalSlug: text(80).default(""),
-    featuredRole: text(60).default(""),
+    featuredRole: text(40).default(""),
   }),
   about: z.object({
     title: reqText(80),

@@ -7,16 +7,29 @@ import { PageHero } from "@/components/site/page-hero";
 import { ButtonLink } from "@/components/ui/button";
 import { WEEKDAY_LABELS, minutesToHHMM } from "@/lib/format";
 import { getPublishedProfessional, professionalDisplayName } from "@/server/services/public-site";
+import { getSiteContent } from "@/server/services/settings";
 
 export async function generateMetadata({ params }: PageProps<"/profesionales/[slug]">): Promise<Metadata> {
   const { slug } = await params;
   const p = await getPublishedProfessional(slug);
   if (!p) return { title: "Profesional no encontrado" };
   const specialties = p.specialties.map((s) => s.specialty.name).join(", ");
+  const name = professionalDisplayName(p);
+  const description = `${name}${specialties ? ` — ${specialties}` : ""}. CMIO, Capiatá.`;
+  const { institution } = await getSiteContent("published");
   return {
-    title: professionalDisplayName(p),
-    description: `${professionalDisplayName(p)}${specialties ? ` — ${specialties}` : ""}. CMIO, Capiatá.`,
+    title: name,
+    description,
     alternates: { canonical: `/profesionales/${p.slug}` },
+    // La vista previa al compartir el perfil muestra al profesional, no la imagen de portada.
+    openGraph: {
+      type: "profile",
+      locale: "es_PY",
+      siteName: `${institution.shortName} — ${institution.name}`,
+      title: name,
+      description,
+      images: p.photoPath ? [{ url: p.photoPath, alt: `Fotografía de ${name}` }] : [],
+    },
   };
 }
 

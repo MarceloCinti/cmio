@@ -20,6 +20,9 @@ test.describe("Sitio público", () => {
     const card = hero.getByRole("link", { name: /Dr\. Hugo Rojas/ });
     await expect(card).toBeVisible();
     await expect(card).toContainText("Al frente del CMIO");
+    // La foto principal es de banco de imágenes: se aclara y no se rotula con el nombre del médico.
+    await expect(hero.getByText("Imagen ilustrativa")).toBeVisible();
+    await expect(hero.getByText("Dr. Hugo Rojas · CMIO")).toHaveCount(0);
     await card.click();
     await expect(page).toHaveURL(/\/profesionales\/dr-hugo-rojas$/);
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Hugo Rojas");
