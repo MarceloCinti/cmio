@@ -7,7 +7,7 @@ export default function GlobalError({ reset }: { error: Error & { digest?: strin
         <main style={{ maxWidth: 420, textAlign: "center", padding: 24 }}>
           <h1 style={{ fontSize: 24 }}>No pudimos cargar la plataforma</h1>
           <p style={{ color: "#55676c" }}>Ocurrió un error inesperado. Intenta nuevamente en unos minutos.</p>
-          <button type="button" onClick={reset} style={{ marginTop: 16, padding: "12px 20px", borderRadius: 12, border: 0, background: "#0e6e6b", color: "#fff", fontWeight: 600 }}>
+          <button type="button" onClick={reset} style={{ marginTop: 16, padding: "12px 20px", borderRadius: 12, border: 0, background: "#1a4a72", color: "#fff", fontWeight: 600 }}>
             Intentar nuevamente
           </button>
         </main>

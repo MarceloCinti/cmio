@@ -6,7 +6,7 @@
 import { hash } from "@node-rs/argon2";
 import type { Prisma } from "../src/generated/prisma/client";
 import { createScriptClient } from "./script-client";
-import { FAQS, SERVICES, SPECIALTIES } from "./seed-data";
+import { FAQS, PROFESSIONALS, SERVICES, SPECIALTIES } from "./seed-data";
 import { CONFIGURABLE_ROLES, DEFAULT_ROLE_PERMISSIONS } from "../src/lib/permissions";
 import { DEFAULT_SITE_CONTENT, SITE_CONTENT_KEYS } from "../src/lib/site-content";
 import { SYSTEM_SETTING_DEFAULTS } from "../src/lib/system-settings";
@@ -84,7 +84,7 @@ async function seedCatalog() {
         durationMinutes: s.durationMinutes,
         availabilityConfirmed: s.confirmed,
         isPublished: s.confirmed,
-        bookableOnline: s.confirmed,
+        bookableOnline: s.bookable ?? s.confirmed,
         imagePath: s.image?.path ?? null,
         imageAlt: s.image?.alt ?? null,
         sortOrder: s.sortOrder,
@@ -96,6 +96,34 @@ async function seedCatalog() {
     await db.faq.createMany({ data: FAQS.map((f, i) => ({ ...f, sortOrder: i + 1 })) });
   }
   console.log("✓ Especialidades, servicios y preguntas frecuentes");
+}
+
+async function seedProfessionals() {
+  const specialties = await db.specialty.findMany({ select: { id: true, slug: true } });
+  for (const p of PROFESSIONALS) {
+    if (await db.professional.findUnique({ where: { slug: p.slug } })) continue;
+    await db.professional.create({
+      data: {
+        slug: p.slug,
+        honorific: p.honorific,
+        firstName: p.firstName,
+        lastName: p.lastName,
+        bio: p.bio,
+        photoPath: p.photo.path,
+        status: "ACTIVE",
+        isPublished: true,
+        acceptsOnlineBooking: false,
+        sortOrder: p.sortOrder,
+        specialties: {
+          create: p.specialtySlugs
+            .map((slug) => specialties.find((s) => s.slug === slug)?.id)
+            .filter((id): id is string => Boolean(id))
+            .map((specialtyId) => ({ specialtyId })),
+        },
+      },
+    });
+  }
+  console.log("✓ Profesionales del CMIO");
 }
 
 async function seedTemplates() {
@@ -155,6 +183,7 @@ async function main() {
   await seedPermissions();
   await seedContent();
   await seedCatalog();
+  await seedProfessionals();
   await seedTemplates();
   await seedOwner();
 }

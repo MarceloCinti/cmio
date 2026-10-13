@@ -8,15 +8,17 @@ provisionales hasta que la clínica los confirme desde el panel:
 | Pendiente | Dónde se carga | Situación actual |
 |---|---|---|
 | Verificar teléfonos (+595 974 824 111, +595 992 847 006), dirección (Ruta PY02, frente al IPS, Clínica Periférica Campo Vía) y horario (lunes a viernes 09:00–19:00) | Contenido → Institución → marcar "verificados" | Cargados como provisionales |
-| Confirmar que el teléfono principal usa WhatsApp (el acceso a WhatsApp se genera a partir de ese número) | Contenido → Institución → "Número de WhatsApp" | Generado desde el teléfono principal, pendiente de verificación |
+| Confirmar el WhatsApp (el enlace se genera a partir de ese número) | Contenido → Institución → "Número de WhatsApp" | 0974 824 111, publicado por la clínica en Instagram (@cmio_2024); falta marcarlo como verificado |
 | Coordenadas exactas o búsqueda del mapa | Contenido → Institución | Búsqueda por dirección, marcada provisional |
-| Profesionales: nombres, matrículas, especialidades, foto y descripción | Panel → Profesionales (verificar credenciales antes de publicar) | Ningún perfil real; la sección muestra "próximamente" |
-| Servicios distintos de las consultas (estudios, programas, cirugía) | Panel → Servicios → marcar "disponibilidad confirmada" | Cargados como no confirmados y ocultos |
+| Profesionales: matrícula, especialidad y descripción del **Dr. Hugo Rojas** y del **Dr. Francisco Ríos** | Panel → Profesionales (verificar credenciales) | Perfiles publicados con foto de Instagram, **sin matrícula**. Al Dr. Ríos se le asignó Clínica médica porque su uniforme dice "Medicina Interna"; al Dr. Rojas no se le asignó especialidad. Ninguno acepta reservas en línea hasta que se carguen sus horarios |
+| Resto del equipo profesional (nombres, matrículas, especialidades, fotos) | Panel → Profesionales | Sin cargar |
+| Fotografía del Dr. Hugo Rojas atendiendo a un paciente (sesión de fotos real, con consentimiento escrito del paciente) | Contenido → Portada → Imagen principal | Se usa un cuadro de su video de Instagram |
+| Servicios distintos de las consultas (estudios, programas) | Panel → Servicios → marcar "disponibilidad confirmada" | Cargados como no confirmados y ocultos. Las cirugías generales, de vesícula y de hernias y la financiación se publicaron porque la clínica las anunció en Instagram; falta confirmar duraciones y condiciones de financiación |
 | Textos de "La clínica" marcados como provisionales | Contenido → Portada | Visibles con marca interna de provisional |
-| Logotipo y colores definitivos | Contenido → Identidad | Sin logotipo: se muestra un isotipo genérico con la sigla "CMIO" |
+| Archivo original del logotipo (SVG o PNG en alta resolución) | Contenido → Identidad | Se usa una versión recortada de una publicación de Instagram (colores tomados de ese material). Conviene reemplazarla por el archivo original |
 | Precios (si se desean publicar) | Panel → Servicios | Ocultos |
 | Revisión legal de privacidad, términos y aviso de tratamiento de datos | Contenido → Legal → marcar "revisado" | Borradores con aviso "en revisión" |
-| Redes sociales | Contenido → Institución | Vacías |
+| Otras redes sociales (Facebook, TikTok…) | Contenido → Institución | Solo Instagram (@cmio_2024) |
 | Cuenta de correo transaccional (SMTP) y dominio con SPF/DKIM/DMARC | Variables de entorno | Sin configurar |
 | WhatsApp Business: número, cuenta de Meta y plantillas aprobadas | Variables de entorno + Mensajes | Sin configurar |
 | Dominio, servidor y respaldos externos | DESPLIEGUE.md / RESPALDOS.md | Sin configurar |

@@ -76,7 +76,11 @@ export default async function ProfessionalPage({ params }: PageProps<"/profesion
         <aside className="space-y-6">
           <div className="rounded-2xl border border-line bg-surface p-6 shadow-soft">
             <h2 className="text-lg font-semibold text-ink">Agenda con {name}</h2>
-            <p className="mt-2 text-sm text-muted">Elige fecha y horario según la disponibilidad real de su agenda.</p>
+            <p className="mt-2 text-sm text-muted">
+              {p.acceptsOnlineBooking
+                ? "Elige fecha y horario según la disponibilidad real de su agenda."
+                : "Por ahora su agenda se coordina con la secretaría. Envíanos tu solicitud y te contactamos para confirmar el horario."}
+            </p>
             {p.acceptsOnlineBooking ? (
               <ButtonLink href={`/portal/citas/nueva?profesional=${p.id}`} className="mt-5 w-full" icon={<CalendarPlus className="size-5" aria-hidden="true" />}>
                 Agendar en línea

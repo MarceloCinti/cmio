@@ -12,18 +12,18 @@
   se declaran valores por defecto y los derivados.
 */
 :root {
-  --brand-primary: #0e6e6b;
-  --brand-accent: #b4532f;
-  --brand-wellness: #5e9c7c;
-  --brand-ink: #12303a;
+  --brand-primary: #1a4a72;
+  --brand-accent: #287483;
+  --brand-wellness: #3a8a9a;
+  --brand-ink: #112e5f;
   --font-heading-family: "Plus Jakarta Sans Variable";
   --font-body-family: "Inter Variable";
 
   --surface: #ffffff;
-  --canvas: #f5f8f7;
-  --line: #dfe7e5;
-  --line-strong: #c5d2cf;
-  --muted: #55676c;
+  --canvas: #f3f6f9;
+  --line: #dfe5ec;
+  --line-strong: #c6d0db;
+  --muted: #566474;
 }
 
 @theme inline {
@@ -49,8 +49,8 @@
 
 @theme {
   --radius-card: 1rem;
-  --shadow-soft: 0 1px 2px rgb(16 42 51 / 0.05), 0 4px 16px -6px rgb(16 42 51 / 0.08);
-  --shadow-lift: 0 2px 4px rgb(16 42 51 / 0.05), 0 12px 32px -12px rgb(16 42 51 / 0.18);
+  --shadow-soft: 0 1px 2px rgb(17 46 95 / 0.05), 0 4px 16px -6px rgb(17 46 95 / 0.08);
+  --shadow-lift: 0 2px 4px rgb(17 46 95 / 0.05), 0 12px 32px -12px rgb(17 46 95 / 0.18);
   --breakpoint-xs: 25rem;
 }
 

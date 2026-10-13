@@ -238,6 +238,7 @@ enum ServiceCategory {
   CARDIOLOGY_TEST
   LABORATORY
   FOLLOW_UP
+  SURGERY
   OTHER
 }
 

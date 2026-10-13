@@ -10,6 +10,13 @@ test.describe("Acceso y permisos", () => {
     await expect(page).toHaveURL(/\/ingresar\?siguiente=%2Fpanel%2Fpacientes/);
   });
 
+  test("fuera del modo demostración no se ofrecen usuarios de prueba", async ({ page }) => {
+    await page.goto("/ingresar");
+    await expect(page.getByRole("heading", { name: "Ingresar" })).toBeVisible();
+    await expect(page.getByText("Usuarios de prueba")).toHaveCount(0);
+    expect(await page.content()).not.toContain("demo.cmio.local");
+  });
+
   test("credenciales incorrectas muestran un mensaje genérico", async ({ page }) => {
     await login(page, { email: DEMO.paciente.email, password: "Clave-incorrecta-1" }, { expectSuccess: false });
     await expect(page.getByText(/Correo o contraseña incorrectos/)).toBeVisible();

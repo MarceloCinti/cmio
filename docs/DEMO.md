@@ -27,10 +27,17 @@ El script se niega a ejecutarse si `DEMO_MODE` no es `true` o si `NODE_ENV=produ
 Estas contraseñas son públicas: **nunca** cargues datos de demostración en un servidor
 accesible desde internet con datos reales.
 
+Con `DEMO_MODE=true`, la pantalla **Ingresar** muestra estas cuentas debajo del formulario
+("Usuarios de prueba", agrupadas en personal de la clínica y pacientes). Al tocar una, se
+completan el correo y la contraseña; luego se presiona «Ingresar». Sin `DEMO_MODE`, la lista
+no se envía al navegador (lo comprueba la prueba E2E de acceso). Las cuentas se definen en
+`src/lib/demo-accounts.ts`.
+
 ## Qué incluye
 
 - Dos perfiles profesionales activos ficticios (clínica médica y nutrición) con horarios, y un
-  perfil en borrador.
+  perfil en borrador. Se muestran después de los perfiles reales del CMIO (Dr. Hugo Rojas y
+  Dr. Francisco Ríos), que no son ficticios y se cargan con los datos base.
 - Cinco pacientes ficticios; "Paciente Demo Uno" tiene acceso al portal.
 - Agenda del día (si es día hábil) para probar la recepción, una próxima cita del paciente
   con portal y su historial: dos consultas finalizadas, una ausencia y un objetivo de

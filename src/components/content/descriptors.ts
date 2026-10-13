@@ -67,6 +67,7 @@ export const LANDING_FIELDS: FieldDesc[] = [
       { key: "secondaryCta", label: "Botón secundario", type: "text" },
       { key: "imagePath", label: "Imagen principal", type: "image", altKey: "imageAlt" },
       { key: "imageAlt", label: "Descripción de la imagen (texto alternativo)", type: "text" },
+      { key: "imageCaption", label: "Leyenda sobre la foto (opcional, p. ej. nombre del profesional)", type: "text" },
     ],
   },
   {

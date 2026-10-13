@@ -3,9 +3,9 @@
 export const CHART = {
   series: "#0d9488",
   seriesWash: "rgba(13, 148, 136, 0.10)",
-  grid: "#e3e9e7",
-  axisText: "#55676c",
-  ink: "#12303a",
+  grid: "#e3e8ee",
+  axisText: "#566474",
+  ink: "#112e5f",
   surface: "#ffffff",
 };
 

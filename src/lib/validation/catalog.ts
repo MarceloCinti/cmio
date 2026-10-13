@@ -24,7 +24,7 @@ export const serviceSchema = z.object({
   name: requiredText(100, "Indica el nombre."),
   summary: requiredText(200, "Escribe una descripción breve."),
   description: optionalText(2000),
-  category: z.enum(["CONSULTATION", "EVALUATION", "IMAGING", "CARDIOLOGY_TEST", "LABORATORY", "FOLLOW_UP", "OTHER"]),
+  category: z.enum(["CONSULTATION", "EVALUATION", "IMAGING", "CARDIOLOGY_TEST", "LABORATORY", "FOLLOW_UP", "SURGERY", "OTHER"]),
   specialtyId: optionalText(64),
   durationMinutes: intField(5, 480, "Indica la duración en minutos."),
   price: z.preprocess(

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { Alert } from "@/components/ui/alert";
 import { LoginForm } from "@/components/auth/login-form";
 import { getCurrentActor, safeNextPath } from "@/server/auth/current";
+import { DEMO_ACCOUNTS, isDemoMode } from "@/lib/demo-accounts";
 
 export const metadata: Metadata = { title: "Ingresar", robots: { index: false } };
 
@@ -30,7 +31,8 @@ export default async function LoginPage({ searchParams }: PageProps<"/ingresar">
         </Alert>
       ) : null}
       <div className="mt-8">
-        <LoginForm next={next} />
+        {/* Las cuentas de prueba solo se envían al navegador en una instancia de demostración. */}
+        <LoginForm next={next} demoAccounts={isDemoMode() ? DEMO_ACCOUNTS : undefined} />
       </div>
       <div className="mt-8 rounded-2xl border border-line bg-surface p-5 text-sm">
         <p className="font-semibold text-ink">¿Eres paciente y todavía no tienes cuenta?</p>

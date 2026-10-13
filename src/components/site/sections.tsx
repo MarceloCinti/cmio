@@ -23,6 +23,7 @@ import { telHref, whatsappHref, type Institution, type Landing } from "@/lib/sit
 import { SERVICE_CATEGORY_LABELS } from "@/lib/labels";
 import { ContactForm } from "./contact-form";
 import { MapEmbed } from "./map-embed";
+import { InstagramIcon, socialHandle } from "@/components/site/social";
 
 export function SectionHeading({
   eyebrow,
@@ -116,8 +117,13 @@ export function HeroSection({
               fill
               priority
               sizes="(min-width: 1024px) 45vw, 100vw"
-              className="object-cover object-[60%_center]"
+              className="object-cover object-[center_22%]"
             />
+            {hero.imageCaption ? (
+              <span className="absolute top-4 left-4 rounded-full bg-surface/90 px-3 py-1.5 text-xs font-semibold text-ink shadow-soft backdrop-blur">
+                {hero.imageCaption}
+              </span>
+            ) : null}
           </div>
           {hours ? (
             <div className="absolute -bottom-5 left-4 flex items-center gap-3 rounded-2xl border border-line bg-surface/95 px-4 py-3 shadow-lift backdrop-blur sm:left-6">
@@ -311,6 +317,7 @@ type ServiceCard = {
   summary: string;
   category: keyof typeof SERVICE_CATEGORY_LABELS;
   durationMinutes: number;
+  bookableOnline: boolean;
   price: number | null;
   showPrice: boolean;
   imagePath: string | null;
@@ -358,9 +365,12 @@ export function ServicesSection({
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge tone="primary">{SERVICE_CATEGORY_LABELS[s.category]}</Badge>
-                    <span className="inline-flex items-center gap-1 text-xs text-muted">
-                      <Clock className="size-3.5" aria-hidden="true" /> {s.durationMinutes} min
-                    </span>
+                    {/* La duración solo se informa en servicios con turnos (en cirugías depende de cada caso). */}
+                    {s.bookableOnline ? (
+                      <span className="inline-flex items-center gap-1 text-xs text-muted">
+                        <Clock className="size-3.5" aria-hidden="true" /> {s.durationMinutes} min
+                      </span>
+                    ) : null}
                   </div>
                   <h3 className="mt-2 text-lg font-semibold text-ink">{s.name}</h3>
                   <p className="mt-1 text-sm leading-relaxed text-muted">{s.summary}</p>
@@ -404,6 +414,7 @@ type ProfessionalCard = {
   lastName: string;
   photoPath: string | null;
   bio: string | null;
+  acceptsOnlineBooking: boolean;
   specialties: { specialty: { name: string; slug: string; isPublished: boolean } }[];
 };
 
@@ -452,9 +463,15 @@ export function ProfessionalsSection({
                     <ButtonLink href={`/profesionales/${p.slug}`} size="sm" variant="outline">
                       Ver perfil
                     </ButtonLink>
-                    <ButtonLink href={`/portal/citas/nueva?profesional=${p.id}`} size="sm" variant="subtle" icon={<CalendarPlus className="size-4" aria-hidden="true" />}>
-                      Agendar
-                    </ButtonLink>
+                    {p.acceptsOnlineBooking ? (
+                      <ButtonLink href={`/portal/citas/nueva?profesional=${p.id}`} size="sm" variant="subtle" icon={<CalendarPlus className="size-4" aria-hidden="true" />}>
+                        Agendar
+                      </ButtonLink>
+                    ) : (
+                      <ButtonLink href="/solicitar-cita" size="sm" variant="subtle" icon={<CalendarPlus className="size-4" aria-hidden="true" />}>
+                        Solicitar cita
+                      </ButtonLink>
+                    )}
                   </div>
                 </li>
               );
@@ -640,6 +657,20 @@ export function ContactSection({
                     </dd>
                   </div>
                 </div>
+                {institution.instagramUrl ? (
+                  <div className="flex gap-3">
+                    <InstagramIcon className="mt-0.5 size-5 shrink-0 text-primary" />
+                    <div>
+                      <dt className="text-sm font-semibold text-ink">Redes sociales</dt>
+                      <dd className="text-sm text-muted">
+                        <a href={institution.instagramUrl} target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline">
+                          Instagram {socialHandle(institution.instagramUrl)}
+                        </a>
+                        <span className="block text-xs">Novedades, consejos de salud y videos de nuestros profesionales.</span>
+                      </dd>
+                    </div>
+                  </div>
+                ) : null}
               </dl>
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
                 {institution.phones[0] && telHref(institution.phones[0].number) ? (

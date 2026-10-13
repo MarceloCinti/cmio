@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Clock, MapPin, MessageCircle, Phone } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
+import { InstagramIcon, socialHandle } from "@/components/site/social";
 import { telHref, whatsappHref, type Branding, type Institution } from "@/lib/site-content";
 
 export function SiteFooter({
@@ -54,6 +55,14 @@ export function SiteFooter({
                 <MessageCircle className="size-4 text-primary" aria-hidden="true" />
                 <a className="text-ink hover:text-primary hover:underline" href={wa} target="_blank" rel="noopener noreferrer">
                   Escribir por WhatsApp
+                </a>
+              </li>
+            ) : null}
+            {institution.instagramUrl ? (
+              <li className="flex items-center gap-2">
+                <InstagramIcon className="size-4 text-primary" />
+                <a className="text-ink hover:text-primary hover:underline" href={institution.instagramUrl} target="_blank" rel="noopener noreferrer">
+                  Instagram {socialHandle(institution.instagramUrl)}
                 </a>
               </li>
             ) : null}

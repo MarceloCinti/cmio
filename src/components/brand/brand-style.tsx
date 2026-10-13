@@ -6,12 +6,12 @@ const safe = (value: string, fallback: string) => (HEX.test(value) ? value : fal
 /** Variables CSS de la identidad visual. Los valores se validan como hexadecimales. */
 export function brandCss(branding: Branding, selector = ":root") {
   const fonts = FONT_PAIRS[branding.fontPair] ?? FONT_PAIRS.moderna;
-  return `${selector}{--brand-primary:${safe(branding.primaryColor, "#0e6e6b")};--brand-accent:${safe(
+  return `${selector}{--brand-primary:${safe(branding.primaryColor, "#1a4a72")};--brand-accent:${safe(
     branding.accentColor,
-    "#b4532f",
-  )};--brand-wellness:${safe(branding.wellnessColor, "#5e9c7c")};--brand-ink:${safe(
+    "#287483",
+  )};--brand-wellness:${safe(branding.wellnessColor, "#3a8a9a")};--brand-ink:${safe(
     branding.inkColor,
-    "#12303a",
+    "#112e5f",
   )};--font-heading-family:"${fonts.heading}";--font-body-family:"${fonts.body}";}`;
 }
 

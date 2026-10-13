@@ -15,7 +15,9 @@ implementado se lista en [PENDIENTES.md](PENDIENTES.md).
 | Mapa que se carga solo a pedido | Implementado |
 | Formularios de contacto y solicitud de cita con consentimiento, límites y trampa para bots | Implementado y probado |
 | Privacidad, términos, aviso de tratamiento de datos (borradores marcados "en revisión") | Implementado |
-| Créditos de imágenes (Pexels, con autor y enlace) | Implementado |
+| Identidad visual del CMIO (logotipo y colores tomados de su Instagram), foto del Dr. Hugo Rojas en la portada y del Dr. Francisco Ríos en "La clínica" | Implementado y verificado (capturas) |
+| Cirugía general (vesícula, hernias) y financiación de cirugías, enlace a Instagram @cmio_2024 | Implementado (contenido publicado por la clínica en Instagram) |
+| Créditos de imágenes (fotos del CMIO con su fuente; Pexels con autor y enlace) | Implementado |
 | Verificación pública de recetas y órdenes por código (solo iniciales) | Implementado |
 | SEO: metadatos, Open Graph, `sitemap.xml` y `robots.txt` dinámicos, datos estructurados (JSON-LD), `lang="es-PY"` | Implementado |
 | Diseño móvil primero, sin desbordes en 360/390/768/1024/1440 px | Verificado (E2E + capturas) |
@@ -27,6 +29,7 @@ implementado se lista en [PENDIENTES.md](PENDIENTES.md).
 |---|---|
 | Registro de pacientes en 2 pasos con consentimientos y verificación de correo | Implementado y probado |
 | Ingreso, cierre de sesión, sesiones con renovación | Implementado y probado (integración + E2E) |
+| Usuarios de prueba bajo el formulario de ingreso (solo con `DEMO_MODE=true`): completan correo y contraseña al tocarlos | Implementado y verificado (4 roles); E2E comprueba que no aparecen fuera del modo demostración |
 | Recuperación y cambio de contraseña | Implementado y probado |
 | Bloqueo por intentos fallidos y límites de intentos | Implementado y probado |
 | Invitaciones del personal con rol (sin autoasignación de roles privilegiados) | Implementado y probado |

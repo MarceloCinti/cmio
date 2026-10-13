@@ -1,5 +1,9 @@
-// Imágenes ilustrativas de la landing page. Ninguna corresponde a instalaciones ni a
-// personal del CMIO: son fotografías de banco de imágenes con licencia de uso comercial.
+// Imágenes del sitio.
+// - CLINIC_IMAGES: fotografías y logotipo del propio CMIO, tomados de sus publicaciones
+//   oficiales (Instagram @cmio_2024) y proporcionados por la clínica. Muestran a
+//   profesionales reales del centro.
+// - STOCK_IMAGES: imágenes ilustrativas de banco de imágenes. No corresponden a
+//   instalaciones ni a personal del CMIO: son fotografías con licencia de uso comercial.
 // Licencia Pexels: https://www.pexels.com/license/ (uso gratuito, comercial, sin
 // atribución obligatoria; no se debe sugerir que las personas retratadas respaldan
 // a la clínica ni mostrarlas de forma ofensiva).
@@ -141,3 +145,45 @@ export function stockImageByPath(path: string | null | undefined): StockImage | 
   if (!path) return undefined;
   return STOCK_IMAGE_LIST.find((i) => i.path === path);
 }
+
+export type ClinicImage = { path: string; alt: string; source: string; width: number; height: number };
+
+export const CLINIC_IMAGES = {
+  drHugoRojas: {
+    path: "/images/equipo/dr-hugo-rojas.jpg",
+    alt: "Dr. Hugo Rojas, médico del CMIO, con el uniforme de la clínica",
+    source: "Video publicado por el CMIO en Instagram (@cmio_2024)",
+    width: 1000,
+    height: 1250,
+  },
+  drHugoRojasPerfil: {
+    path: "/images/equipo/dr-hugo-rojas-perfil.jpg",
+    alt: "Retrato del Dr. Hugo Rojas",
+    source: "Video publicado por el CMIO en Instagram (@cmio_2024)",
+    width: 600,
+    height: 600,
+  },
+  drFranciscoRios: {
+    path: "/images/equipo/dr-francisco-rios.jpg",
+    alt: "Dr. Francisco Ríos, médico del CMIO, en el consultorio",
+    source: "Video publicado por el CMIO en Instagram (@cmio_2024)",
+    width: 1170,
+    height: 877,
+  },
+  drFranciscoRiosConsulta: {
+    path: "/images/equipo/dr-francisco-rios-consulta.jpg",
+    alt: "Dr. Francisco Ríos, médico del CMIO, explicando una consulta",
+    source: "Video publicado por el CMIO en Instagram (@cmio_2024)",
+    width: 1170,
+    height: 731,
+  },
+  drFranciscoRiosPerfil: {
+    path: "/images/equipo/dr-francisco-rios-perfil.jpg",
+    alt: "Retrato del Dr. Francisco Ríos",
+    source: "Video publicado por el CMIO en Instagram (@cmio_2024)",
+    width: 600,
+    height: 600,
+  },
+} satisfies Record<string, ClinicImage>;
+
+export const CLINIC_IMAGE_LIST: ClinicImage[] = Object.values(CLINIC_IMAGES);

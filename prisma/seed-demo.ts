@@ -5,19 +5,13 @@
 import { hash } from "@node-rs/argon2";
 import { DateTime } from "luxon";
 import { createScriptClient } from "./script-client";
-import type { AppointmentStatus, Role } from "../src/generated/prisma/client";
+import { DEMO_ACCOUNTS } from "../src/lib/demo-accounts";
+import type { AppointmentStatus } from "../src/generated/prisma/client";
 
 const db = createScriptClient();
 const TZ = "America/Asuncion";
 
-export const DEMO_ACCOUNTS: { email: string; password: string; role: Role; name: string }[] = [
-  { email: "propietario@demo.cmio.local", password: "Demo-Propietario-2026", role: "OWNER", name: "Propietario Demo" },
-  { email: "admin@demo.cmio.local", password: "Demo-Admin-2026", role: "ADMIN", name: "Administración Demo" },
-  { email: "secretaria@demo.cmio.local", password: "Demo-Secretaria-2026", role: "SECRETARY", name: "Secretaría Demo" },
-  { email: "medico@demo.cmio.local", password: "Demo-Medico-2026", role: "DOCTOR", name: "Profesional Demo Clínica" },
-  { email: "nutricion@demo.cmio.local", password: "Demo-Nutricion-2026", role: "DOCTOR", name: "Profesional Demo Nutrición" },
-  { email: "paciente@demo.cmio.local", password: "Demo-Paciente-2026", role: "PATIENT", name: "Paciente Demo Uno" },
-];
+export { DEMO_ACCOUNTS };
 
 const hashPw = (p: string) => hash(p, { memoryCost: 19456, timeCost: 2, parallelism: 1, outputLen: 32 });
 
@@ -73,7 +67,7 @@ async function main() {
       acceptsOnlineBooking: true,
       agendaColor: "#0e6e6b",
       userId: users["medico@demo.cmio.local"],
-      sortOrder: 1,
+      sortOrder: 10,
       specialties: { create: [{ specialtyId: specialties["clinica-medica"].id }] },
       services: {
         create: [
@@ -103,7 +97,7 @@ async function main() {
       acceptsOnlineBooking: true,
       agendaColor: "#5e9c7c",
       userId: users["nutricion@demo.cmio.local"],
-      sortOrder: 2,
+      sortOrder: 11,
       specialties: { create: [{ specialtyId: specialties["nutricion"].id }] },
       services: { create: [{ serviceId: services["consulta-nutricion"].id }, { serviceId: services["evaluacion-nutricional"].id }] },
       scheduleRules: {

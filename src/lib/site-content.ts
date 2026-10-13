@@ -4,7 +4,7 @@ import { z } from "zod";
 // Cada sección tiene borrador y versión publicada (ver SiteContent en Prisma).
 // Los textos marcados como "provisional" deben ser revisados por la clínica.
 
-const hex = z.string().regex(/^#[0-9a-fA-F]{6}$/, "Usa un color hexadecimal, por ejemplo #0E6E6B");
+const hex = z.string().regex(/^#[0-9a-fA-F]{6}$/, "Usa un color hexadecimal, por ejemplo #1A4A72");
 const text = (max: number) => z.string().trim().max(max, `Máximo ${max} caracteres`);
 const reqText = (max: number) => text(max).min(1, "Este campo es obligatorio");
 
@@ -66,6 +66,8 @@ export const landingSchema = z.object({
     secondaryCta: reqText(40),
     imagePath: reqText(300),
     imageAlt: reqText(200),
+    // Leyenda visible sobre la foto (p. ej., el nombre del profesional retratado).
+    imageCaption: text(80).default(""),
   }),
   about: z.object({
     title: reqText(80),
@@ -133,13 +135,15 @@ export type SiteContentMap = {
 // Valores iniciales
 // ─────────────────────────────────────────────────────────────
 
+// Identidad tomada del logo y las publicaciones oficiales del CMIO (Instagram @cmio_2024):
+// azul marino del logotipo, turquesa del trazo y fondos claros fríos.
 export const DEFAULT_BRANDING: Branding = {
-  logoPath: null,
+  logoPath: "/images/marca/cmio-logo.png",
   logoAlt: "CMIO — Centro de Manejo Integral de la Obesidad",
-  primaryColor: "#0E6E6B",
-  accentColor: "#B4532F",
-  wellnessColor: "#5E9C7C",
-  inkColor: "#12303A",
+  primaryColor: "#1A4A72",
+  accentColor: "#287483",
+  wellnessColor: "#3A8A9A",
+  inkColor: "#112E5F",
   fontPair: "moderna",
 };
 
@@ -164,33 +168,35 @@ export const DEFAULT_INSTITUTION: Institution = {
   latitude: null,
   longitude: null,
   facebookUrl: "",
-  instagramUrl: "",
+  // Cuenta oficial de la clínica.
+  instagramUrl: "https://www.instagram.com/cmio_2024",
   contactVerified: false,
 };
 
 export const DEFAULT_LANDING: Landing = {
   hero: {
-    eyebrow: "Centro de Manejo Integral de la Obesidad · Capiatá",
+    eyebrow: "Tu salud, nuestra prioridad · Capiatá",
     title: "Un enfoque integral para cuidar tu salud y bienestar.",
     subtitle:
       "Atención médica multidisciplinaria para acompañarte en el cuidado de tu peso, tu salud metabólica y tu calidad de vida.",
     primaryCta: "Agendar una consulta",
     secondaryCta: "Conocer nuestros servicios",
-    imagePath: "/images/consulta-medica.jpg",
-    imageAlt: "Médica sonriente conversando con un paciente en un consultorio luminoso",
+    imagePath: "/images/equipo/dr-hugo-rojas.jpg",
+    imageAlt: "Dr. Hugo Rojas, médico del CMIO, con el uniforme de la clínica",
+    imageCaption: "Dr. Hugo Rojas · CMIO",
   },
   about: {
     title: "La clínica",
     intro:
       "En el CMIO trabajamos con un enfoque integral: el cuidado del peso y de la salud metabólica involucra a distintas especialidades que se coordinan alrededor de cada paciente.",
-    imagePath: "/images/equipo-multidisciplinario.jpg",
-    imageAlt: "Dos profesionales de la salud conversan con dos pacientes en un consultorio moderno",
+    imagePath: "/images/equipo/dr-francisco-rios.jpg",
+    imageAlt: "Dr. Francisco Ríos, médico del CMIO, en el consultorio",
     blocks: [
       {
         key: "presentacion",
         title: "Presentación",
         body:
-          "El Centro de Manejo Integral de la Obesidad reúne en un mismo lugar consultas de nutrición, clínica médica, endocrinología, cardiología y cirugía bariátrica y metabólica, para que cada persona reciba una evaluación completa y un seguimiento ordenado.",
+          "El Centro de Manejo Integral de la Obesidad reúne en un mismo lugar consultas de nutrición, clínica médica, endocrinología, cardiología, cirugía general y cirugía bariátrica y metabólica, para que cada persona reciba una evaluación completa y un seguimiento ordenado.",
         visible: true,
         provisional: true,
       },
@@ -224,6 +230,14 @@ export const DEFAULT_LANDING: Landing = {
           "Cada proceso comienza con una evaluación inicial. A partir de ella, el equipo define junto al paciente un plan de atención y los controles de seguimiento que correspondan, con registro ordenado de cada consulta.",
         visible: true,
         provisional: true,
+      },
+      {
+        key: "financiacion",
+        title: "Financiación de cirugías",
+        body:
+          "Ofrecemos opciones de financiación para cirugías, con una entrega inicial y cuotas. Acércate a la clínica y te presentamos un plan adaptado a tus necesidades.",
+        visible: true,
+        provisional: false,
       },
       {
         key: "instalaciones",
@@ -269,8 +283,8 @@ export const DEFAULT_LANDING: Landing = {
   faq: { title: "Preguntas frecuentes", intro: "Respuestas a las consultas más habituales." },
   contact: { title: "Ubicación y contacto", intro: "Estamos en Capiatá. Escríbenos o llámanos para coordinar tu atención." },
   ctaBand: {
-    title: "¿Quieres dar el primer paso?",
-    body: "Solicita tu cita en línea o comunícate con la secretaría. Te ayudaremos a elegir la consulta adecuada.",
+    title: "Estamos para acompañarte en cada paso.",
+    body: "Solicita tu cita en línea, por WhatsApp o comunicándote con la secretaría. Te ayudaremos a elegir la consulta adecuada.",
     button: "Solicitar una cita",
     imagePath: "/images/alimentacion-saludable.jpg",
     imageAlt: "Verduras, frutas frescas y un libro de recetas sobre una mesa",
@@ -278,7 +292,7 @@ export const DEFAULT_LANDING: Landing = {
   seo: {
     title: "CMIO Capiatá — Centro de Manejo Integral de la Obesidad",
     description:
-      "Atención médica multidisciplinaria en Capiatá: nutrición, clínica médica, endocrinología, cardiología y cirugía bariátrica y metabólica. Solicita tu cita en línea.",
+      "Atención multidisciplinaria en Capiatá: nutrición, clínica médica, endocrinología, cardiología, cirugía general y bariátrica. Solicita tu cita en línea.",
   },
 };
 

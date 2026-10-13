@@ -3,13 +3,13 @@
 import Image from "next/image";
 import { useRef, useState, useTransition } from "react";
 import { ImagePlus, X } from "lucide-react";
-import { STOCK_IMAGE_LIST } from "@/lib/images";
+import { CLINIC_IMAGE_LIST, STOCK_IMAGE_LIST } from "@/lib/images";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/cn";
 import { uploadImageAction } from "@/app/panel/admin-actions";
 
-/** Selector de imagen: biblioteca de imágenes con licencia o subida propia (JPG/PNG/WebP, máx. 5 MB). */
+/** Selector de imagen: fotos del CMIO, biblioteca de imágenes con licencia o subida propia (JPG/PNG/WebP, máx. 5 MB). */
 export function ImagePicker({
   value,
   onChange,
@@ -70,7 +70,7 @@ export function ImagePicker({
       {error ? <p className="text-sm font-medium text-red-700">{error}</p> : null}
       {open ? (
         <ul className="grid grid-cols-3 gap-2 rounded-xl border border-line bg-canvas p-2 sm:grid-cols-5">
-          {STOCK_IMAGE_LIST.map((img) => (
+          {[...CLINIC_IMAGE_LIST, ...STOCK_IMAGE_LIST].map((img) => (
             <li key={img.path}>
               <button
                 type="button"

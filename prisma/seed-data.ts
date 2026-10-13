@@ -3,7 +3,7 @@
 // un administrador confirme que la clínica efectivamente los ofrece.
 
 import type { ServiceCategory } from "../src/generated/prisma/client";
-import { STOCK_IMAGES } from "../src/lib/images";
+import { CLINIC_IMAGES, STOCK_IMAGES } from "../src/lib/images";
 
 export const SPECIALTIES = [
   {
@@ -51,6 +51,17 @@ export const SPECIALTIES = [
     image: STOCK_IMAGES.cirugiaBariatrica,
     sortOrder: 5,
   },
+  // Publicada por la clínica en Instagram (@cmio_2024): "Todo tipo de cirugías: cirugías
+  // generales, de vesícula, de hernias y más", con opciones de financiación.
+  {
+    slug: "cirugia-general",
+    name: "Cirugía general",
+    summary: "Cirugías generales, de vesícula y de hernias, con opciones de financiación.",
+    description:
+      "El CMIO realiza cirugías generales, entre ellas cirugías de vesícula y de hernias. Ofrecemos opciones de financiación con una entrega inicial y cuotas: consulta las condiciones con la secretaría.",
+    image: STOCK_IMAGES.consultaMedica,
+    sortOrder: 6,
+  },
 ] as const;
 
 type ServiceSeed = {
@@ -62,6 +73,8 @@ type ServiceSeed = {
   specialtySlug?: string;
   durationMinutes: number;
   confirmed: boolean;
+  // Se puede reservar en línea (por defecto, si el servicio está confirmado).
+  bookable?: boolean;
   image?: { path: string; alt: string };
   sortOrder: number;
 };
@@ -193,6 +206,72 @@ export const SERVICES: ServiceSeed[] = [
     confirmed: false,
     image: STOCK_IMAGES.seguimiento,
     sortOrder: 11,
+  },
+  // Confirmados por la publicación oficial de la clínica en Instagram (@cmio_2024).
+  {
+    slug: "consulta-cirugia-general",
+    name: "Consulta de cirugía general",
+    summary: "Evaluación quirúrgica y orientación sobre el procedimiento indicado.",
+    description:
+      "Consulta para evaluar la indicación de una cirugía general (por ejemplo, de vesícula o de hernias), explicar el procedimiento y presentar las opciones de financiación disponibles.",
+    category: "CONSULTATION",
+    specialtySlug: "cirugia-general",
+    durationMinutes: 30,
+    confirmed: true,
+    sortOrder: 12,
+  },
+  {
+    slug: "cirugia-vesicula",
+    name: "Cirugía de vesícula",
+    summary: "Cirugía de la vesícula biliar. Se coordina luego de la consulta con el cirujano.",
+    description:
+      "La indicación, la preparación y la fecha se definen en la consulta de cirugía general. Hay opciones de financiación con una entrega inicial y cuotas.",
+    category: "SURGERY",
+    specialtySlug: "cirugia-general",
+    durationMinutes: 120,
+    confirmed: true,
+    bookable: false,
+    sortOrder: 13,
+  },
+  {
+    slug: "cirugia-hernias",
+    name: "Cirugía de hernias",
+    summary: "Reparación quirúrgica de hernias. Se coordina luego de la consulta con el cirujano.",
+    description:
+      "La indicación, la preparación y la fecha se definen en la consulta de cirugía general. Hay opciones de financiación con una entrega inicial y cuotas.",
+    category: "SURGERY",
+    specialtySlug: "cirugia-general",
+    durationMinutes: 120,
+    confirmed: true,
+    bookable: false,
+    sortOrder: 14,
+  },
+];
+
+// Profesionales del CMIO identificados por la clínica (fotografías de sus publicaciones
+// oficiales). La matrícula, la especialidad registrada y la agenda se cargan y verifican
+// desde el panel; hasta entonces no se muestran datos de matrícula ni se aceptan reservas
+// en línea con estos perfiles.
+export const PROFESSIONALS = [
+  {
+    slug: "dr-hugo-rojas",
+    honorific: "Dr.",
+    firstName: "Hugo",
+    lastName: "Rojas",
+    bio: "Médico del CMIO, al frente del centro y de su equipo de profesionales.",
+    photo: CLINIC_IMAGES.drHugoRojasPerfil,
+    specialtySlugs: [] as string[],
+    sortOrder: 0,
+  },
+  {
+    slug: "dr-francisco-rios",
+    honorific: "Dr.",
+    firstName: "Francisco",
+    lastName: "Ríos",
+    bio: "Médico del equipo del CMIO, con dedicación a la medicina interna (clínica médica).",
+    photo: CLINIC_IMAGES.drFranciscoRiosPerfil,
+    specialtySlugs: ["clinica-medica"],
+    sortOrder: 1,
   },
 ];
 

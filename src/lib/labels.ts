@@ -8,6 +8,7 @@ export const SERVICE_CATEGORY_LABELS = {
   CARDIOLOGY_TEST: "Estudio cardiológico",
   LABORATORY: "Laboratorio",
   FOLLOW_UP: "Seguimiento",
+  SURGERY: "Cirugía",
   OTHER: "Otro",
 } as const;
 
