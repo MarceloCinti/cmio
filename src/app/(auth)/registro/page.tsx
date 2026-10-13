@@ -23,7 +23,7 @@ export default async function RegisterPage({ searchParams }: PageProps<"/registr
           <RegisterForm next={next} />
         ) : (
           <Alert tone="warning" title="Registro en línea no disponible">
-            Por el momento la clínica no tiene habilitado el registro en línea. Comunícate con la secretaría para que te envíen una invitación al portal.
+            Por el momento la clínica no tiene habilitado el registro en línea. Comunícate con la secretaría para gestionar tu acceso al portal.
           </Alert>
         )}
       </div>

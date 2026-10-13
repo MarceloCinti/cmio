@@ -4,7 +4,7 @@ import { db } from "@/server/db";
 import { resetEnvCacheForTests } from "@/server/env";
 import { resetEmailTransportForTests } from "@/server/integrations/email";
 import { processMessageQueue, queueMessage, sendSecurityEmail } from "@/server/services/messaging";
-import { notifyAppointmentEvent } from "@/server/services/appointment-notifications";
+import { deliveredNoticeChannels, notifyAppointmentEvent } from "@/server/services/appointment-notifications";
 import { bookAppointment } from "@/server/services/appointments";
 import { updateSystemSetting } from "@/server/services/settings";
 import { updateTemplate } from "@/server/services/messages-admin";
@@ -117,6 +117,24 @@ describe("Mensajería y recuperación ante fallos", () => {
     const result = await runScheduledJobs();
     expect(result.sent).toBeGreaterThanOrEqual(1);
     expect(await db.outboundMessage.count({ where: { status: "PENDING" } })).toBe(0);
+  });
+});
+
+describe("Avisos mostrados al paciente", () => {
+  beforeEach(resetDatabase);
+
+  it("solo menciona canales por los que realmente se envía el aviso", async () => {
+    const { professional, service } = await createProfessionalWithSchedule();
+    const { patient } = await createPatient();
+    const sec = await actorFor((await createUser("SECRETARY")).id);
+    const appt = await bookAppointment(sec, { patientId: patient.id, professionalId: professional.id, serviceId: service.id, startsAt: localToUtc(addDaysISO(todayISO(), 2), 540).toISOString() });
+    // La reserva ya encoló sus avisos reales; se parte de un registro vacío para cada caso.
+    await db.outboundMessage.deleteMany({ where: { appointmentId: appt.id } });
+    const base = { event: "APPOINTMENT_BOOKED" as const, recipient: "x", appointmentId: appt.id, patientId: patient.id };
+    await db.outboundMessage.create({ data: { ...base, channel: "WHATSAPP", status: "SKIPPED", skipReason: "NO_CONFIGURADO" } });
+    expect(await deliveredNoticeChannels(appt.id, "APPOINTMENT_BOOKED")).toEqual([]);
+    await db.outboundMessage.create({ data: { ...base, channel: "EMAIL", status: "PENDING" } });
+    expect(await deliveredNoticeChannels(appt.id, "APPOINTMENT_BOOKED")).toEqual(["EMAIL"]);
   });
 });
 

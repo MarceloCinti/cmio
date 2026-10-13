@@ -9,6 +9,7 @@ import { AppointmentTimeline } from "@/components/appointments/timeline";
 import { requirePatient } from "@/server/auth/current";
 import { getAppointmentEvents, getAppointmentForActor } from "@/server/services/appointments";
 import { getSiteContent, getSystemSetting } from "@/server/services/settings";
+import { deliveredNoticeChannels } from "@/server/services/appointment-notifications";
 import { professionalDisplayName } from "@/server/services/public-site";
 import { NotFoundError } from "@/server/errors";
 import { formatDateTime, formatLongDate, formatTime } from "@/lib/format";
@@ -32,12 +33,15 @@ export default async function MyAppointmentPage({ params, searchParams }: PagePr
   const canCancel = open && now <= start - policy.patientCancelMinHours * 3600_000;
   const canReschedule = open && policy.allowPatientReschedule && now <= start - policy.patientRescheduleMinHours * 3600_000;
   const phone = institution.phones[0]?.number;
+  const noticeChannels = sp.nueva === "1" ? await deliveredNoticeChannels(appt.id, "APPOINTMENT_BOOKED") : [];
+  const channelNames = noticeChannels.map((c) => (c === "EMAIL" ? "correo electrónico" : "WhatsApp")).join(" y ");
 
   return (
     <div className="space-y-6">
       {sp.nueva === "1" ? (
         <Alert tone="success" title="¡Tu cita quedó agendada!" live>
-          Te enviamos la confirmación por los medios que autorizaste. Código de la cita: <strong>{appt.code}</strong>.
+          {channelNames ? `Te enviamos la confirmación por ${channelNames}. ` : "Guarda este código; también encontrarás la cita en «Mis citas». "}
+          Código de la cita: <strong>{appt.code}</strong>.
         </Alert>
       ) : null}
       {sp.reprogramada === "1" ? (

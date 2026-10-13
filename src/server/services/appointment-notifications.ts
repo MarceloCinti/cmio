@@ -91,3 +91,17 @@ export async function queueDueReminders(now = new Date()) {
   }
   return due.length;
 }
+
+/**
+ * Canales por los que realmente se envía (o está en cola) el aviso de una cita.
+ * Los mensajes omitidos (sin credenciales, sin consentimiento, canal desactivado) no cuentan:
+ * la interfaz nunca debe afirmar un envío que no ocurre. El acceso a la cita se valida antes.
+ */
+export async function deliveredNoticeChannels(appointmentId: string, event: MessageEvent) {
+  const rows = await db.outboundMessage.findMany({
+    where: { appointmentId, event, status: { in: ["PENDING", "SENT"] } },
+    select: { channel: true },
+    distinct: ["channel"],
+  });
+  return rows.map((r) => r.channel);
+}
