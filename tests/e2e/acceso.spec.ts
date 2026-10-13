@@ -51,6 +51,9 @@ test.describe("Acceso y permisos", () => {
     await login(page, DEMO.paciente);
     await expect(page).toHaveURL(/\/portal$/);
     await page.getByRole("button", { name: /Cerrar sesión|Salir/ }).first().click();
+    // Espera a que termine el cierre de sesión antes de navegar (si no, la navegación puede cortarlo).
+    await expect(page).toHaveURL(/\/ingresar\?salida=1/);
+    await expect(page.getByText("Cerraste tu sesión de forma segura.")).toBeVisible();
     await page.goto("/portal");
     await expect(page).toHaveURL(/\/ingresar/);
   });
